@@ -1,6 +1,7 @@
 #! gmake
 
 # This is Makefile for Beremiz installer
+#
 # invoke with "make" on a linux box having those packages installed :
 #  - wine
 #  - mingw32
@@ -8,6 +9,10 @@
 #  - unrar
 #  - wget
 #  - nsis
+#
+# WARNING : DISPLAY variable have to be defined to a valid X server
+#           in case it would be a problem, run :
+#           xvfb-run make -f /path/to/this/Makefile
 
 version = 1.03
 
@@ -81,20 +86,17 @@ mingw:
 	touch mingw
 
 # a directory to collect binaries that must be in the path
-bin_collect_dir = $(mingwdir)/bin
-$(bin_collect_dir): mingw
 
 msiexec = WINEPREFIX=$(tmp) msiexec
 wine = WINEPREFIX=$(tmp) wine
 pydir = build/python
 pysite = $(pydir)/Lib/site-packages
 
-python: $(bin_collect_dir)
+python:
+	mkdir -p $(pydir)
 	# Python
 	$(call get_src_http,http://www.python.org/ftp/python/2.7.2,python-2.7.2.msi)\
 	$(msiexec) /qn /a $$dld TARGETDIR=.\\$(pydir)
-	cp $(tmp)/drive_c/windows/system32/msvcr71.dll $(bin_collect_dir)
-	mv $(pydir)/python27.dll $(bin_collect_dir)
 	
 	# WxPython (needs running inno unpacker in wine)
 	$(call get_src_sf,innounp/innounp/innounp%200.36,innounp036.rar)\
@@ -103,13 +105,17 @@ python: $(bin_collect_dir)
 	$(wine) $(tmp)/innounp.exe -d$(tmp) -x $$dld
 	cp -R $(tmp)/\{code_GetPythonDir\}/* $(pydir)
 	cp -R $(tmp)/\{app\}/* $(pysite)
-	mv $(pysite)/wx-2.8-msw-unicode/wx/*.dll $(bin_collect_dir)
+	
+	# wxPython fails if VC9.0 bullshit is not fully here.
+	$(call get_src_http,http://download.microsoft.com/download/1/1/1/1116b75a-9ec3-481a-a3c8-1777b5381140,vcredist_x86.exe)\
+	cp $$dld $(tmp)
+	$(wine) $(tmp)/vcredist_x86.exe /qn /a
+	cp $(tmp)/drive_c/windows/winsxs/x86_Microsoft.VC90.CRT*/* $(pydir)
 	
 	# pywin32
 	$(call get_src_sf,pywin32/pywin32/Build216,pywin32-216.win32-py2.7.exe)\
 	unzip -d $(tmp)/pw32 $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/pw32/PLATLIB/* $(pysite)
-	mv $(pysite)/pywin32_system32/*.dll $(bin_collect_dir)
 	
 	# Twisted
 	$(call get_src_pypi,2.7/T/Twisted,Twisted-11.0.0.winxp32-py2.7.msi)\
