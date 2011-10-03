@@ -26,7 +26,7 @@ tar --strip-components=1 -C $(1) -xvjf $(tmp)/`basename $(1)`.tar.bz2
 endef
 
 define get_src_http
-dld=$(distfiles)/$(2);[ -f $$dld ] && echo "Exists :" $(2) || wget $(1)/$(2) -O $$dld;
+dld=$(distfiles)/$(2);( ( [ -f $$dld ] || wget $(1)/$(2) -O $$dld ) && ( [ ! -f $$dld.md5 ] && md5sum $$dld > $$dld.md5 || md5sum -c $$dld.md5 ) ) &&
 endef
 
 define get_src_pypi
@@ -94,7 +94,7 @@ python: $(bin_collect_dir)
 	$(call get_src_http,http://www.python.org/ftp/python/2.7.2,python-2.7.2.msi)\
 	$(msiexec) /qn /a $$dld TARGETDIR=.\\$(pydir)
 	cp $(tmp)/drive_c/windows/system32/msvcr71.dll $(bin_collect_dir)
-	cp $(pydir)/python27.dll $(bin_collect_dir)
+	mv $(pydir)/python27.dll $(bin_collect_dir)
 	
 	# WxPython (needs running inno unpacker in wine)
 	$(call get_src_sf,innounp/innounp/innounp%200.36,innounp036.rar)\
@@ -103,12 +103,13 @@ python: $(bin_collect_dir)
 	$(wine) $(tmp)/innounp.exe -d$(tmp) -x $$dld
 	cp -R $(tmp)/\{code_GetPythonDir\}/* $(pydir)
 	cp -R $(tmp)/\{app\}/* $(pysite)
+	mv $(pysite)/wx-2.8-msw-unicode/wx/*.dll $(bin_collect_dir)
 	
 	# pywin32
 	$(call get_src_sf,pywin32/pywin32/Build216,pywin32-216.win32-py2.7.exe)\
 	unzip -d $(tmp)/pw32 $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/pw32/PLATLIB/* $(pysite)
-	cp $(pysite)/pywin32_system32/*.dll $(bin_collect_dir)
+	mv $(pysite)/pywin32_system32/*.dll $(bin_collect_dir)
 	
 	# Twisted
 	$(call get_src_pypi,2.7/T/Twisted,Twisted-11.0.0.winxp32-py2.7.msi)\
