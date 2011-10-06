@@ -117,6 +117,11 @@ python:
 	unzip -d $(tmp)/pw32 $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/pw32/PLATLIB/* $(pysite)
 	
+	# zope.interface 
+	$(call get_src_pypi,/2.7/z/zope.interface,zope.interface-3.8.0-py2.7-win32.egg)\
+	unzip -d $(tmp) $$dld 
+	cp -R $(tmp)/zope $(pysite)
+	
 	# Twisted
 	$(call get_src_pypi,2.7/T/Twisted,Twisted-11.0.0.winxp32-py2.7.msi)\
 	$(msiexec) /qn /a $$dld TARGETDIR=.\\$(pydir)
