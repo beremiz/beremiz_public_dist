@@ -46,10 +46,11 @@ Section "Shortcuts"
   SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\Beremiz"
   SetOutPath "$INSTDIR\mingw\bin"
-  
   CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "${PYTHONW_EXE}" '"$INSTDIR\plcopeneditor\plcopeneditor.py"' "$INSTDIR\plcopeneditor\images\poe.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+  SetShellVarContext current
+  CreateShortCut "$DESKTOP\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
 SectionEnd
 
 Section "Uninstall"
@@ -61,4 +62,6 @@ Section "Uninstall"
   RMDir /R "$INSTDIR"
   DeleteRegKey /ifempty HKCU "Software\Beremiz"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Beremiz"
+  SetShellVarContext current
+  Delete "$DESKTOP\Beremiz.lnk"
 SectionEnd

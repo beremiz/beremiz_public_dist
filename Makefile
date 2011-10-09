@@ -172,7 +172,7 @@ beremiz:
 	$(call get_src_hg,build/beremiz)
 	touch beremiz
 
-Beremiz-$(version).exe: python mingw matiec plcopeneditor beremiz
+Beremiz-$(version).exe: python mingw matiec plcopeneditor beremiz $(src)/license.txt $(src)/install.nsi
 	sed -e 's/\$$BVERSION/$(version)/g' $(src)/license.txt > build/license.txt
 	sed -e 's/\$$BVERSION/$(version)/g' $(src)/install.nsi | makensis - 
 	
