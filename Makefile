@@ -31,7 +31,7 @@ tar --strip-components=1 -C $(1) -xvjf $(tmp)/`basename $(1)`.tar.bz2
 endef
 
 define get_src_http
-dld=$(distfiles)/$(2);( ( [ -f $$dld ] || wget $(1)/$(2) -O $$dld ) && ( [ ! -f $$dld.md5 ] && md5sum $$dld > $$dld.md5 || md5sum -c $$dld.md5 ) ) &&
+dld=$(distfiles)/`echo $(2) | tr ' ()' '___'`;( ( [ -f $$dld ] || wget $(1)/$(2) -O $$dld ) && ( [ ! -f $$dld.md5 ] && (cd $(distfiles);md5sum `basename $$dld`) > $$dld.md5 || (cd $(distfiles);md5sum -c `basename $$dld.md5`) ) ) &&
 endef
 
 define get_src_pypi
@@ -46,6 +46,7 @@ all: Beremiz-$(version).exe
 
 mingwdir=build/mingw
 mingw: 
+	rm -rf $(mingwdir)
 	mkdir -p $(mingwdir)
 	# windows.h
 	$(call get_src_sf,mingw/MinGW/BaseSystem/RuntimeLibrary/Win32-API/w32api-3.17,w32api-3.17-2-mingw32-dev.tar.lzma)\
@@ -93,6 +94,7 @@ pydir = build/python
 pysite = $(pydir)/Lib/site-packages
 
 python:
+	rm -rf $(pydir)
 	mkdir -p $(pydir)
 	# Python
 	$(call get_src_http,http://www.python.org/ftp/python/2.7.2,python-2.7.2.msi)\
