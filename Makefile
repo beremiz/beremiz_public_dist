@@ -2,32 +2,71 @@
 
 # This is Makefile for Beremiz installer
 #
-# invoke with "make" on a linux box having those packages installed :
-#  - wine
+# Invoke with "make -f path/to/Makefile" on a linux box 
+# in directory where build should happen.
+#
+# All those dependencies have to be installed :
+#
+#  Windows installer :
+#  - wine (tested with 1.2 and 1.6. Fail with 1.4)
 #  - mingw32
+#  - flex
+#  - bison
 #  - tar
 #  - unrar
 #  - wget
 #  - nsis
+#  - libtool
+#  - xmlstarlet
+#  - xsltproc
+#  - python-lxml
+#
+#  Linux RootFS and packages
+#  - reprepro 
+#  - multistrap
+#  - germinate
+#  - user-mode-linux
+#  - ddpt
 #
 # WARNING : DISPLAY variable have to be defined to a valid X server
 #           in case it would be a problem, run :
 #           xvfb-run make -f /path/to/this/Makefile
 
-version = 1.03
+version = 1.1
 
 HGROOT := ~/src
+GITROOT := $(HGROOT)
+HGPULL = 0
+DIST =
 CPUS = 8
+BLKDEV=/dev/null
 
 src := $(shell dirname $(lastword $(MAKEFILE_LIST)))
 distfiles = $(src)/distfiles
-sfmirror = ovh
+sfmirror = downloads
 tmp := $(shell mktemp -d)
 
+ifeq ("$(HGPULL)","1")
+define hg_get_archive
+hg -R $(HGROOT)/`basename $(1)` pull
+hg -R $(HGROOT)/`basename $(1)` update $(2)
+hg -R $(HGROOT)/`basename $(1)` archive $(1)
+endef
+else
+define hg_get_archive
+hg -R $(HGROOT)/`basename $(1)` archive $(2) $(1)
+endef
+endif
+
 define get_src_hg
-hg -R $(HGROOT)/`basename $(1)` archive $(tmp)/`basename $(1)`.tar.bz2
+rm -rf $(1)
+$(call hg_get_archive, $(1), $(2))
+endef
+
+define get_src_git
+rm -rf $(1)
 mkdir $(1)
-tar --strip-components=1 -C $(1) -xvjf $(tmp)/`basename $(1)`.tar.bz2
+(cd $(GITROOT)/`basename $(1)`; git archive --format=tar $(2)) | tar -C $(1) -x
 endef
 
 define get_src_http
@@ -39,61 +78,67 @@ $(call get_src_http,http://pypi.python.org/packages/$(1),$(2))
 endef
 
 define get_src_sf
-$(call get_src_http,http://$(sfmirror).dl.sourceforge.net/project/$(1),$(2))
+$(call get_src_http,http://$(sfmirror).sourceforge.net/project/$(1),$(2))
 endef
 
-all: Beremiz-$(version).exe
+all: Beremiz-$(version).exe $(targets_add)
 
+
+ifneq ("$(DIST)","")
+include $(src)/$(DIST).mk
+endif
+
+CUSTOM := public
+CUSTOM_DIR := $(src)
+
+include $(CUSTOM_DIR)/$(CUSTOM).mk
+
+build:
+	rm -rf build
+	mkdir -p build
+
+# native toolchain, pre-built
 mingwdir=build/mingw
-mingw: 
+mingw: |build
 	rm -rf $(mingwdir)
 	mkdir -p $(mingwdir)
 	# windows.h
-	$(call get_src_sf,mingw/MinGW/BaseSystem/RuntimeLibrary/Win32-API/w32api-3.17,w32api-3.17-2-mingw32-dev.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/w32api/w32api-3.17,w32api-3.17-2-mingw32-dev.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
 	# mingw runtime
-	$(call get_src_sf,mingw/MinGW/BaseSystem/RuntimeLibrary/MinGW-RT/mingwrt-3.20,mingwrt-3.20-mingw32-dll.tar.gz)\
-	tar -C $(mingwdir) -xvzf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/mingw-rt/mingwrt-3.20,mingwrt-3.20-mingw32-dll.tar.gz)\
+	tar -C $(mingwdir) -xzf $$dld
 	# mingw headers and lib
-	$(call get_src_sf,mingw/MinGW/BaseSystem/RuntimeLibrary/MinGW-RT/mingwrt-3.20,mingwrt-3.20-mingw32-dev.tar.gz)\
-	tar -C $(mingwdir) -xvzf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/mingw-rt/mingwrt-3.20,mingwrt-3.20-mingw32-dev.tar.gz)\
+	tar -C $(mingwdir) -xzf $$dld
 	# binutils
-	$(call get_src_sf,mingw/MinGW/BaseSystem/GNU-Binutils/binutils-2.21.53,binutils-2.21.53-1-mingw32-bin.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/binutils/binutils-2.21.53,binutils-2.21.53-1-mingw32-bin.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
 	# C compiler
-	$(call get_src_sf,mingw/MinGW/BaseSystem/GCC/Version4/gcc-4.6.1-2,gcc-core-4.6.1-2-mingw32-bin.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
-	# C++ compiler
-	#$(call get_src_sf,mingw/MinGW/BaseSystem/GCC/Version4/gcc-4.6.1-2,gcc-c++-4.6.1-2-mingw32-bin.tar.lzma)\
-	#tar -C $(mingwdir) --lzma -xvf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/gcc/Version4/gcc-4.6.1-2,gcc-core-4.6.1-2-mingw32-bin.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
 	# dependencies
-	$(call get_src_sf,mingw/MinGW/gmp/gmp-5.0.1-1,libgmp-5.0.1-1-mingw32-dll-10.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
-	$(call get_src_sf,mingw/MinGW/mpc/mpc-0.8.1-1,libmpc-0.8.1-1-mingw32-dll-2.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
-	$(call get_src_sf,mingw/MinGW/mpfr/mpfr-2.4.1-1,libmpfr-2.4.1-1-mingw32-dll-1.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
-	#$(call get_src_sf,mingw/MinGW/pthreads-w32/pthreads-w32-2.9.0-pre-20110507-2,libpthreadgc-2.9.0-mingw32-pre-20110507-2-dll-2.tar.lzma)\
-	#tar -C $(mingwdir) --lzma -xvf $$dld
-	#$(call get_src_sf,mingw/MinGW/pthreads-w32/pthreads-w32-2.9.0-pre-20110507-2,pthreads-w32-2.9.0-mingw32-pre-20110507-2-dev.tar.lzma)\
-	#tar -C $(mingwdir) --lzma -xvf $$dld
-	$(call get_src_sf,mingw/MinGW/gettext/gettext-0.17-1,libintl-0.17-1-mingw32-dll-8.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
-	$(call get_src_sf,mingw/MinGW/gettext/gettext-0.17-1,libgettextpo-0.17-1-mingw32-dll-0.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
-	$(call get_src_sf,mingw/MinGW/libiconv/libiconv-1.13.1-1,libiconv-1.13.1-1-mingw32-dll-2.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xvf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/gmp/gmp-5.0.1-1,libgmp-5.0.1-1-mingw32-dll-10.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/mpc/mpc-0.8.1-1,libmpc-0.8.1-1-mingw32-dll-2.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/mpfr/mpfr-2.4.1-1,libmpfr-2.4.1-1-mingw32-dll-1.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/gettext/gettext-0.17-1,libintl-0.17-1-mingw32-dll-8.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/gettext/gettext-0.17-1,libgettextpo-0.17-1-mingw32-dll-0.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_src_sf,mingw/MinGW/Base/libiconv/libiconv-1.13.1-1,libiconv-1.13.1-1-mingw32-dll-2.tar.lzma)\
+	tar -C $(mingwdir) --lzma -xf $$dld
 	
-	touch mingw
-
-# a directory to collect binaries that must be in the path
+	touch $@
 
 msiexec = WINEPREFIX=$(tmp) msiexec
 wine = WINEPREFIX=$(tmp) wine
 pydir = build/python
 pysite = $(pydir)/Lib/site-packages
 
-python:
+python: |build
 	rm -rf $(pydir)
 	mkdir -p $(pydir)
 	# Python
@@ -113,6 +158,11 @@ python:
 	cp $$dld $(tmp)
 	$(wine) $(tmp)/vcredist_x86.exe /qn /a
 	cp $(tmp)/drive_c/windows/winsxs/x86_Microsoft.VC90.CRT*/* $(pydir)
+
+	# MathPlotLib
+	$(call get_src_http,https://github.com/downloads/matplotlib/matplotlib,matplotlib-1.2.0.win32-py2.7.exe)\
+	unzip -d $(tmp)/mathplotlib $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
+	cp -R $(tmp)/mathplotlib/PLATLIB/* $(pysite)
 	
 	# pywin32
 	$(call get_src_sf,pywin32/pywin32/Build216,pywin32-216.win32-py2.7.exe)\
@@ -130,7 +180,7 @@ python:
 	
 	# Nevow
 	$(call get_src_pypi,source/N/Nevow,Nevow-0.10.0.tar.gz)\
-	tar -C $(tmp) -xvzf $$dld
+	tar -C $(tmp) -xzf $$dld
 	for i in nevow formless twisted; do cp -R $(tmp)/Nevow-0.10.0/$$i $(pysite); done
 	
 	# Numpy
@@ -140,7 +190,7 @@ python:
 	
 	# SimpleJson
 	$(call get_src_pypi,source/s/simplejson,simplejson-2.2.1.tar.gz)\
-	tar -C $(tmp) -xvzf $$dld
+	tar -C $(tmp) -xzf $$dld
 	cp -R $(tmp)/simplejson-2.2.1/simplejson/ $(pysite)
 	
 	# WxGlade
@@ -149,33 +199,76 @@ python:
 	mv $(tmp)/agriggio-wxglade-b0247325407e $(pysite)/wxglade
 	
 	# Pyro
-	$(call get_src_pypi,source/P/Pyro,Pyro-3.15.tar.gz)\
-	tar -C $(tmp) -xvzf $$dld
-	mv $(tmp)/Pyro-3.15/Pyro $(pysite)
+	$(call get_src_pypi,source/P/Pyro,Pyro-3.9.1.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	mv $(tmp)/Pyro-3.9.1/Pyro $(pysite)
 	
-	touch python
+	# Lxml
+	$(call get_src_pypi,2.7/l/lxml,lxml-3.2.3.win32-py2.7.exe)\
+	unzip -d $(tmp)/lxml $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
+	cp -R $(tmp)/lxml/PLATLIB/* $(pysite)
+
+	touch $@
 
 matiecdir = build/matiec
-matiec: 
+matiec: |build
 	$(call get_src_hg,$(tmp)/matiec)
 	cd $(tmp)/matiec ;\
+	autoreconf;\
 	./configure --host=i586-mingw32msvc;\
 	make -j$(CPUS);
-	mkdir $(matiecdir)
+	rm -rf $(matiecdir)
+	mkdir -p $(matiecdir)
 	mv $(tmp)/matiec/*.exe $(matiecdir)
 	mv $(tmp)/matiec/lib $(matiecdir)
-	touch matiec
-	
-plcopeneditor:
-	$(call get_src_hg,build/plcopeneditor)
-	touch plcopeneditor
+	touch $@
 
-beremiz:
+examples: |build
+	rm -rf  examples
+	mkdir -p examples
+
+beremiz: | build examples 
 	$(call get_src_hg,build/beremiz)
-	touch beremiz
+	$(call tweak_beremiz_targets)
+	rm -rf examples/canopen_tests
+	mkdir -p examples/canopen_tests
+	mv build/beremiz/tests/canopen_* examples/canopen_tests
+	rm -rf examples/base_tests
+	mkdir -p examples/base_tests
+	mv build/beremiz/tests/* examples/base_tests
+	touch $@
 
-Beremiz-$(version).exe: python mingw matiec plcopeneditor beremiz $(src)/license.txt $(src)/install.nsi
+beremiz_etherlab_plugin: beremiz | examples
+	$(call get_src_hg,$(tmp)/beremiz_etherlab_plugin)
+	rm -rf examples/ethercat_tests
+	mv $(tmp)/beremiz_etherlab_plugin/ethercat_tests examples/
+	rm -rf build/EthercatMaster
+	mv $(tmp)/beremiz_etherlab_plugin/etherlab build/EthercatMaster
+	touch $@
+
+CFbuild = build/CanFestival-3
+CFconfig = $(CFbuild)/objdictgen/canfestival_config.py
+canfestival: mingw
+	rm -rf $(CFbuild)
+	$(call get_src_hg,$(CFbuild))
+	cd $(CFbuild); \
+	./configure --can=tcp_win32 \
+				--cc=i586-mingw32msvc-gcc \
+				--cxx=i586-mingw32msvc-g++ \
+				--target=win32 \
+				--wx=0
+	$(MAKE) -C $(CFbuild)
+	cd $(CFbuild); find . -name "*.o" -exec rm {} ';' #remove object files only
+	touch $@
+
+targets=python mingw matiec beremiz
+Beremiz-$(version).exe: $(targets) $(src)/license.txt $(src)/install.nsi $(targets_ex)
 	sed -e 's/\$$BVERSION/$(version)/g' $(src)/license.txt > build/license.txt
-	sed -e 's/\$$BVERSION/$(version)/g' $(src)/install.nsi | makensis - 
+	sed -e 's/\$$BVERSION/$(version)/g' $(src)/install.nsi |\
+    sed -e 's/\$$BEXTENSIONS/$(extensions)/g' |\
+    makensis - 
 	
+clean_installer:
+	rm -rf build Beremiz-$(version).exe $(targets) $(targets_ex)
+
 
