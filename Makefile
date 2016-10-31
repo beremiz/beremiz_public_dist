@@ -169,8 +169,8 @@ python: |build
 	unzip -d $(tmp)/pw32 $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/pw32/PLATLIB/* $(pysite)
 	
-	# zope.interface 
-	$(call get_src_pypi,/2.7/z/zope.interface,zope.interface-3.8.0-py2.7-win32.egg)\
+	# zope.interface
+	$(call get_src_pypi,9d/2d/beb32519c0bd19bda4ac38c34db417d563ee698518e582f951d0b9e5898b,zope.interface-4.3.2-py2.7-win32.egg)\
 	unzip -d $(tmp) $$dld 
 	cp -R $(tmp)/zope $(pysite)
 	
