@@ -2,7 +2,7 @@
 
 # This is Makefile for Beremiz installer
 #
-# Invoke with "make -f path/to/Makefile" on a linux box 
+# Invoke with "make -f path/to/Makefile" on a linux box
 # in directory where build should happen.
 #
 # All those dependencies have to be installed :
@@ -22,7 +22,7 @@
 #  - python-lxml
 #
 #  Linux RootFS and packages
-#  - reprepro 
+#  - reprepro
 #  - multistrap
 #  - germinate
 #  - user-mode-linux
@@ -182,7 +182,7 @@ python: |build
 	
 	# zope.interface
 	$(call get_src_pypi,9d/2d/beb32519c0bd19bda4ac38c34db417d563ee698518e582f951d0b9e5898b,zope.interface-4.3.2-py2.7-win32.egg)\
-	unzip -d $(tmp) $$dld 
+	unzip -d $(tmp) $$dld
 	cp -R $(tmp)/zope $(pysite)
 	
 	# Twisted
@@ -207,7 +207,7 @@ python: |build
 	# WxGlade
 
 	$(call get_src_http,https://bitbucket.org/wxglade/wxglade/get,034d891cc947.zip)\
-	unzip -d $(tmp) $$dld 
+	unzip -d $(tmp) $$dld
 	mv $(tmp)/wxglade-wxglade-034d891cc947 $(pysite)/wxglade
 	
 	# Pyro
@@ -244,7 +244,7 @@ examples: |build
 	rm -rf  examples
 	mkdir -p examples
 
-beremiz: | build examples 
+beremiz: | build examples
 	$(call get_src_hg,build/beremiz)
 	$(call tweak_beremiz_targets)
 	rm -rf examples/canopen_tests
@@ -282,9 +282,9 @@ targets=python mingw matiec beremiz
 Beremiz-$(version).exe: $(targets) $(src)/license.txt $(src)/install.nsi $(targets_ex)
 	sed -e 's/\$$BVERSION/$(version)/g' $(src)/license.txt > build/license.txt
 	sed -e 's/\$$BVERSION/$(version)/g' $(src)/install.nsi |\
-    sed -e 's/\$$BEXTENSIONS/$(extensions)/g' |\
-    makensis - 
-	
+	sed -e 's/\$$BEXTENSIONS/$(extensions)/g' |\
+        makensis -
+
 clean_installer:
 	rm -rf build Beremiz-$(version).exe $(targets) $(targets_ex)
 
