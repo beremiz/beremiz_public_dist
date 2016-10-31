@@ -117,10 +117,10 @@ mingw: |build
 	$(call get_src_sf,mingw/MinGW/Base/w32api/w32api-3.17,w32api-3.17-2-mingw32-dev.tar.lzma)\
 	tar -C $(mingwdir) --lzma -xf $$dld
 	# mingw runtime
-	$(call get_src_sf,mingw/MinGW/Base/mingw-rt/mingwrt-3.20,mingwrt-3.20-mingw32-dll.tar.gz)\
+	$(call get_src_sf,mingw/MinGW/Base/mingwrt/mingwrt-3.20,mingwrt-3.20-mingw32-dll.tar.gz)\
 	tar -C $(mingwdir) -xzf $$dld
 	# mingw headers and lib
-	$(call get_src_sf,mingw/MinGW/Base/mingw-rt/mingwrt-3.20,mingwrt-3.20-mingw32-dev.tar.gz)\
+	$(call get_src_sf,mingw/MinGW/Base/mingwrt/mingwrt-3.20,mingwrt-3.20-mingw32-dev.tar.gz)\
 	tar -C $(mingwdir) -xzf $$dld
 	# binutils
 	$(call get_src_sf,mingw/MinGW/Base/binutils/binutils-2.21.53,binutils-2.21.53-1-mingw32-bin.tar.lzma)\
