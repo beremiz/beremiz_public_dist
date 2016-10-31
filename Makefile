@@ -194,9 +194,10 @@ python: |build
 	cp -R $(tmp)/simplejson-2.2.1/simplejson/ $(pysite)
 	
 	# WxGlade
-	$(call get_src_http,https://bitbucket.org/agriggio/wxglade/get,b0247325407e.zip)\
+
+	$(call get_src_http,https://bitbucket.org/wxglade/wxglade/get,034d891cc947.zip)\
 	unzip -d $(tmp) $$dld 
-	mv $(tmp)/agriggio-wxglade-b0247325407e $(pysite)/wxglade
+	mv $(tmp)/wxglade-wxglade-034d891cc947 $(pysite)/wxglade
 	
 	# Pyro
 	$(call get_src_pypi,source/P/Pyro,Pyro-3.9.1.tar.gz)\
