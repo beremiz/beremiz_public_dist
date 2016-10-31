@@ -41,6 +41,17 @@ DIST =
 CPUS = 8
 BLKDEV=/dev/null
 
+
+CROSS_COMPILE=i686-w64-mingw32
+CROSS_COMPILE_LIBS_DIR=/usr/lib/gcc/$(CROSS_COMPILE)/6.1-win32
+CC=$(CROSS_COMPILE)-gcc
+CXX=$(CROSS_COMPILE)-g++
+
+define get_runtime_libs
+	cp $(CROSS_COMPILE_LIBS_DIR)/libgcc_s_sjlj-1.dll $(1)
+	cp $(CROSS_COMPILE_LIBS_DIR)/libstdc++-6.dll $(1)
+endef
+
 src := $(shell dirname $(lastword $(MAKEFILE_LIST)))
 distfiles = $(src)/distfiles
 sfmirror = downloads
@@ -216,11 +227,16 @@ matiec: |build
 	$(call get_src_hg,$(tmp)/matiec)
 	cd $(tmp)/matiec ;\
 	autoreconf;\
-	./configure --host=i586-mingw32msvc;\
+	automake --add-missing;\
+	./configure --host=$(CROSS_COMPILE);\
 	make -j$(CPUS);
 	rm -rf $(matiecdir)
 	mkdir -p $(matiecdir)
 	mv $(tmp)/matiec/*.exe $(matiecdir)
+
+	# install necessary shared libraries from local cross-compiler
+	$(call get_runtime_libs,$(matiecdir))
+
 	mv $(tmp)/matiec/lib $(matiecdir)
 	touch $@
 
@@ -254,8 +270,8 @@ canfestival: mingw
 	$(call get_src_hg,$(CFbuild))
 	cd $(CFbuild); \
 	./configure --can=tcp_win32 \
-				--cc=i586-mingw32msvc-gcc \
-				--cxx=i586-mingw32msvc-g++ \
+				--cc=$(CC) \
+				--cxx=$(CXX) \
 				--target=win32 \
 				--wx=0
 	$(MAKE) -C $(CFbuild)
