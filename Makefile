@@ -69,6 +69,10 @@ hg -R $(HGROOT)/`basename $(1)` archive $(2) $(1)
 endef
 endif
 
+define hg_get_rev_num
+hg -R $(HGROOT)/`basename $(1)` id -i | sed 's/\+//' > $(2)
+endef
+
 define get_src_hg
 rm -rf $(1)
 $(call hg_get_archive, $(1), $(2))
@@ -246,6 +250,7 @@ examples: |build
 
 beremiz: | build examples
 	$(call get_src_hg,build/beremiz)
+	$(call hg_get_rev_num,beremiz,build/beremiz/revision)
 	$(call tweak_beremiz_targets)
 	rm -rf examples/canopen_tests
 	mkdir -p examples/canopen_tests
