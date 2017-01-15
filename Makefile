@@ -107,38 +107,44 @@ build:
 
 # native toolchain, pre-built
 mingwdir=build/mingw
+
+define get_mingw
+$(call get_src_sf,mingw/MinGW/Base/$(1),$(2)) tar -C $(mingwdir) --lzma -xf $$dld
+endef
+define get_msys
+$(call get_src_sf,mingw/MSYS/Base/$(1),$(2)) tar -C $(mingwdir) --lzma -xf $$dld
+endef
 mingw: |build
 	rm -rf $(mingwdir)
 	mkdir -p $(mingwdir)
 	# windows.h
-	$(call get_src_sf,mingw/MinGW/Base/w32api/w32api-3.17,w32api-3.17-2-mingw32-dev.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_mingw,w32api/w32api-3.17,w32api-3.17-2-mingw32-dev.tar.lzma)
 	# mingw runtime
-	$(call get_src_sf,mingw/MinGW/Base/mingwrt/mingwrt-3.20,mingwrt-3.20-mingw32-dll.tar.gz)\
-	tar -C $(mingwdir) -xzf $$dld
+	$(call get_mingw,mingwrt/mingwrt-3.20,mingwrt-3.20-2-mingw32-dll.tar.lzma)
 	# mingw headers and lib
-	$(call get_src_sf,mingw/MinGW/Base/mingwrt/mingwrt-3.20,mingwrt-3.20-mingw32-dev.tar.gz)\
-	tar -C $(mingwdir) -xzf $$dld
+	$(call get_mingw,mingwrt/mingwrt-3.20,mingwrt-3.20-2-mingw32-dev.tar.lzma)
 	# binutils
-	$(call get_src_sf,mingw/MinGW/Base/binutils/binutils-2.21.53,binutils-2.21.53-1-mingw32-bin.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_mingw,binutils/binutils-2.21.53,binutils-2.21.53-1-mingw32-bin.tar.lzma)
 	# C compiler
-	$(call get_src_sf,mingw/MinGW/Base/gcc/Version4/gcc-4.6.1-2,gcc-core-4.6.1-2-mingw32-bin.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
+	$(call get_mingw,gcc/Version4/gcc-4.6.1-2,gcc-core-4.6.1-2-mingw32-bin.tar.lzma)
 	# dependencies
-	$(call get_src_sf,mingw/MinGW/Base/gmp/gmp-5.0.1-1,libgmp-5.0.1-1-mingw32-dll-10.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
-	$(call get_src_sf,mingw/MinGW/Base/mpc/mpc-0.8.1-1,libmpc-0.8.1-1-mingw32-dll-2.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
-	$(call get_src_sf,mingw/MinGW/Base/mpfr/mpfr-2.4.1-1,libmpfr-2.4.1-1-mingw32-dll-1.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
-	$(call get_src_sf,mingw/MinGW/Base/gettext/gettext-0.17-1,libintl-0.17-1-mingw32-dll-8.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
-	$(call get_src_sf,mingw/MinGW/Base/gettext/gettext-0.17-1,libgettextpo-0.17-1-mingw32-dll-0.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
-	$(call get_src_sf,mingw/MinGW/Base/libiconv/libiconv-1.13.1-1,libiconv-1.13.1-1-mingw32-dll-2.tar.lzma)\
-	tar -C $(mingwdir) --lzma -xf $$dld
-	
+	$(call get_mingw,gmp/gmp-5.0.1-1,libgmp-5.0.1-1-mingw32-dll-10.tar.lzma)
+	$(call get_mingw,mpc/mpc-0.8.1-1,libmpc-0.8.1-1-mingw32-dll-2.tar.lzma)
+	$(call get_mingw,mpfr/mpfr-2.4.1-1,libmpfr-2.4.1-1-mingw32-dll-1.tar.lzma)
+	$(call get_mingw,gettext/gettext-0.17-1,libintl-0.17-1-mingw32-dll-8.tar.lzma)
+	$(call get_mingw,gettext/gettext-0.17-1,libgettextpo-0.17-1-mingw32-dll-0.tar.lzma)
+	$(call get_mingw,libiconv/libiconv-1.13.1-1,libiconv-1.13.1-1-mingw32-dll-2.tar.lzma)
+	# make, bash, and dependencies
+	$(call get_msys,bash/bash-3.1.17-3,bash-3.1.17-3-msys-1.0.13-bin.tar.lzma)
+	$(call get_msys,coreutils/coreutils-5.97-3,coreutils-5.97-3-msys-1.0.13-bin.tar.lzma)
+	$(call get_msys,libiconv/libiconv-1.13.1-2,libiconv-1.13.1-2-msys-1.0.13-bin.tar.lzma)
+	$(call get_msys,libiconv/libiconv-1.13.1-2,libiconv-1.13.1-2-msys-1.0.13-dll-2.tar.lzma)
+	$(call get_msys,gettext/gettext-0.17-2,libintl-0.17-2-msys-dll-8.tar.lzma)
+	$(call get_msys,regex/regex-1.20090805-2,libregex-1.20090805-2-msys-1.0.13-dll-1.tar.lzma)
+	$(call get_msys,termcap/termcap-0.20050421_1-2,libtermcap-0.20050421_1-2-msys-1.0.13-dll-0.tar.lzma)
+	$(call get_msys,make/make-3.81-3,make-3.81-3-msys-1.0.13-bin.tar.lzma) 
+	$(call get_msys,msys-core/msys-1.0.13-2,msysCORE-1.0.13-2-msys-1.0.13-bin.tar.lzma)
+	$(call get_msys,termcap/termcap-0.20050421_1-2,libtermcap-0.20050421_1-2-msys-1.0.13-dll-0.tar.lzma)
 	touch $@
 
 msiexec = WINEPREFIX=$(tmp) msiexec
