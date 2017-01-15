@@ -21,13 +21,6 @@
 #  - xsltproc
 #  - python-lxml
 #
-#  Linux RootFS and packages
-#  - reprepro
-#  - multistrap
-#  - germinate
-#  - user-mode-linux
-#  - ddpt
-#
 # WARNING : DISPLAY variable have to be defined to a valid X server
 #           in case it would be a problem, run :
 #           xvfb-run make -f /path/to/this/Makefile
@@ -258,14 +251,6 @@ beremiz: | build examples
 	rm -rf examples/base_tests
 	mkdir -p examples/base_tests
 	mv build/beremiz/tests/* examples/base_tests
-	touch $@
-
-beremiz_etherlab_plugin: beremiz | examples
-	$(call get_src_hg,$(tmp)/beremiz_etherlab_plugin)
-	rm -rf examples/ethercat_tests
-	mv $(tmp)/beremiz_etherlab_plugin/ethercat_tests examples/
-	rm -rf build/EthercatMaster
-	mv $(tmp)/beremiz_etherlab_plugin/etherlab build/EthercatMaster
 	touch $@
 
 CFbuild = build/CanFestival-3
