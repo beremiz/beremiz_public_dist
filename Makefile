@@ -36,7 +36,7 @@ BLKDEV=/dev/null
 
 
 CROSS_COMPILE=i686-w64-mingw32
-CROSS_COMPILE_LIBS_DIR=/usr/lib/gcc/$(CROSS_COMPILE)/6.1-win32
+CROSS_COMPILE_LIBS_DIR=$(shell dirname $(shell $(CROSS_COMPILE)-gcc -print-libgcc-file-name))
 CC=$(CROSS_COMPILE)-gcc
 CXX=$(CROSS_COMPILE)-g++
 
