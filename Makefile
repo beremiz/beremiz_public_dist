@@ -124,7 +124,7 @@ mingw: |build
 	# mingw headers and lib
 	$(call get_mingw,mingwrt/mingwrt-3.20,mingwrt-3.20-2-mingw32-dev.tar.lzma)
 	# binutils
-	$(call get_mingw,binutils/binutils-2.21.53,binutils-2.21.53-1-mingw32-bin.tar.lzma)
+	$(call get_mingw,binutils/binutils-2.28,binutils-2.28-1-mingw32-bin.tar.xz)
 	# C compiler
 	$(call get_mingw,gcc/Version4/gcc-4.6.1-2,gcc-core-4.6.1-2-mingw32-bin.tar.lzma)
 	# dependencies
