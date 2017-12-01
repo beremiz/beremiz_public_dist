@@ -82,7 +82,7 @@ dld=$(distfiles)/`echo $(2) | tr ' ()' '___'`;( ( [ -f $$dld ] || wget $(1)/$(2)
 endef
 
 define get_src_pypi
-$(call get_src_http,http://pypi.python.org/packages/$(1),$(2))
+$(call get_src_http,https://pypi.python.org/packages/$(1),$(2))
 endef
 
 define get_src_sf
