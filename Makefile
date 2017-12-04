@@ -27,9 +27,9 @@
 
 version = 1.2-rc1
 
-HGROOT := ~/src
+HGREMOTE ?= https://hg.beremiz.org/
+HGROOT ?= $(abspath $(CURDIR)/..)
 GITROOT := $(HGROOT)
-HGPULL = 0
 DIST =
 CPUS = 8
 BLKDEV=/dev/null
@@ -50,20 +50,10 @@ distfiles = $(src)/distfiles
 sfmirror = downloads
 tmp := $(shell mktemp -d)
 
-ifeq ("$(HGPULL)","1")
 define hg_get_archive
-hg -R $(HGROOT)/`basename $(1)` pull
-hg -R $(HGROOT)/`basename $(1)` update $(2)
-hg -R $(HGROOT)/`basename $(1)` archive $(1)
-endef
-else
-define hg_get_archive
+test -d $(HGROOT)/`basename $(1)` || hg --cwd $(HGROOT) clone $(HGREMOTE)`basename $(1)`
 hg -R $(HGROOT)/`basename $(1)` archive $(2) $(1)
-endef
-endif
-
-define hg_get_rev_num
-hg -R $(HGROOT)/`basename $(1)` id -i | sed 's/\+//' > $(2)
+hg -R $(HGROOT)/`basename $(1)` id -i | sed 's/\+//' > $(1)/revision
 endef
 
 define get_src_hg
@@ -82,11 +72,11 @@ dld=$(distfiles)/`echo $(2) | tr ' ()' '___'`;( ( [ -f $$dld ] || wget $(1)/$(2)
 endef
 
 define get_src_pypi
-$(call get_src_http,http://pypi.python.org/packages/$(1),$(2))
+$(call get_src_http,https://pypi.python.org/packages/$(1),$(2))
 endef
 
 define get_src_sf
-$(call get_src_http,http://$(sfmirror).sourceforge.net/project/$(1),$(2))
+$(call get_src_http,https://$(sfmirror).sourceforge.net/project/$(1),$(2))
 endef
 
 all: Beremiz-$(version).exe $(targets_add)
@@ -109,41 +99,42 @@ build:
 mingwdir=build/mingw
 
 define get_mingw
-$(call get_src_sf,mingw/MinGW/Base/$(1),$(2)) tar -C $(mingwdir) --lzma -xf $$dld
+$(call get_src_sf,mingw/MinGW/Base/$(1),$(2)) tar -C $(mingwdir) -xf $$dld
 endef
 define get_msys
-$(call get_src_sf,mingw/MSYS/Base/$(1),$(2)) tar -C $(mingwdir) --lzma -xf $$dld
+$(call get_src_sf,mingw/MSYS/Base/$(1),$(2)) tar -C $(mingwdir) -xf $$dld
 endef
 mingw: |build
 	rm -rf $(mingwdir)
 	mkdir -p $(mingwdir)
 	# windows.h
-	$(call get_mingw,w32api/w32api-3.17,w32api-3.17-2-mingw32-dev.tar.lzma)
+	$(call get_mingw,w32api/w32api-5.0.1,w32api-5.0.1-mingw32-dev.tar.xz)
 	# mingw runtime
-	$(call get_mingw,mingwrt/mingwrt-3.20,mingwrt-3.20-2-mingw32-dll.tar.lzma)
+	$(call get_mingw,mingwrt/mingwrt-5.0.1,mingwrt-5.0.1-mingw32-dll.tar.xz)
 	# mingw headers and lib
-	$(call get_mingw,mingwrt/mingwrt-3.20,mingwrt-3.20-2-mingw32-dev.tar.lzma)
+	$(call get_mingw,mingwrt/mingwrt-5.0.1,mingwrt-5.0.1-mingw32-dev.tar.xz)
 	# binutils
-	$(call get_mingw,binutils/binutils-2.21.53,binutils-2.21.53-1-mingw32-bin.tar.lzma)
+	$(call get_mingw,binutils/binutils-2.28,binutils-2.28-1-mingw32-bin.tar.xz)
 	# C compiler
-	$(call get_mingw,gcc/Version4/gcc-4.6.1-2,gcc-core-4.6.1-2-mingw32-bin.tar.lzma)
+	$(call get_mingw,gcc/Version6/gcc-6.3.0,gcc-core-6.3.0-1-mingw32-bin.tar.xz)
 	# dependencies
-	$(call get_mingw,gmp/gmp-5.0.1-1,libgmp-5.0.1-1-mingw32-dll-10.tar.lzma)
-	$(call get_mingw,mpc/mpc-0.8.1-1,libmpc-0.8.1-1-mingw32-dll-2.tar.lzma)
-	$(call get_mingw,mpfr/mpfr-2.4.1-1,libmpfr-2.4.1-1-mingw32-dll-1.tar.lzma)
-	$(call get_mingw,gettext/gettext-0.17-1,libintl-0.17-1-mingw32-dll-8.tar.lzma)
-	$(call get_mingw,gettext/gettext-0.17-1,libgettextpo-0.17-1-mingw32-dll-0.tar.lzma)
-	$(call get_mingw,libiconv/libiconv-1.13.1-1,libiconv-1.13.1-1-mingw32-dll-2.tar.lzma)
+	$(call get_mingw,gmp/gmp-6.1.2,libgmp-6.1.2-2-mingw32-dll-10.tar.xz)
+	$(call get_mingw,mpc/mpc-1.0.3,libmpc-1.0.3-1-mingw32-dll-3.tar.xz)
+	$(call get_mingw,mpfr/mpfr-3.1.5,libmpfr-3.1.5-1-mingw32-dll-4.tar.xz)
+	$(call get_mingw,gettext/gettext-0.18.3.2-2,libintl-0.18.3.2-2-mingw32-dll-8.tar.xz)
+	$(call get_mingw,gettext/gettext-0.18.3.2-2,libgettextpo-0.18.3.2-2-mingw32-dll-0.tar.xz)
+	$(call get_mingw,libiconv/libiconv-1.14-3,libiconv-1.14-3-mingw32-dll.tar.lzma)
+
 	# make, bash, and dependencies
-	$(call get_msys,bash/bash-3.1.17-3,bash-3.1.17-3-msys-1.0.13-bin.tar.lzma)
+	$(call get_msys,bash/bash-3.1.23-1,bash-3.1.23-1-msys-1.0.18-bin.tar.xz)
 	$(call get_msys,coreutils/coreutils-5.97-3,coreutils-5.97-3-msys-1.0.13-bin.tar.lzma)
-	$(call get_msys,libiconv/libiconv-1.13.1-2,libiconv-1.13.1-2-msys-1.0.13-bin.tar.lzma)
-	$(call get_msys,libiconv/libiconv-1.13.1-2,libiconv-1.13.1-2-msys-1.0.13-dll-2.tar.lzma)
-	$(call get_msys,gettext/gettext-0.17-2,libintl-0.17-2-msys-dll-8.tar.lzma)
+	$(call get_msys,libiconv/libiconv-1.14-1,libiconv-1.14-1-msys-1.0.17-bin.tar.lzma)
+	$(call get_msys,libiconv/libiconv-1.14-1,libiconv-1.14-1-msys-1.0.17-dll-2.tar.lzma)
+	$(call get_msys,gettext/gettext-0.18.1.1-1,libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar.lzma)
 	$(call get_msys,regex/regex-1.20090805-2,libregex-1.20090805-2-msys-1.0.13-dll-1.tar.lzma)
 	$(call get_msys,termcap/termcap-0.20050421_1-2,libtermcap-0.20050421_1-2-msys-1.0.13-dll-0.tar.lzma)
 	$(call get_msys,make/make-3.81-3,make-3.81-3-msys-1.0.13-bin.tar.lzma) 
-	$(call get_msys,msys-core/msys-1.0.13-2,msysCORE-1.0.13-2-msys-1.0.13-bin.tar.lzma)
+	$(call get_msys,msys-core/msys-1.0.19-1,msysCORE-1.0.19-1-msys-1.0.19-bin.tar.xz)
 	$(call get_msys,termcap/termcap-0.20050421_1-2,libtermcap-0.20050421_1-2-msys-1.0.13-dll-0.tar.lzma)
 	touch $@
 
@@ -270,7 +261,6 @@ examples: |build
 
 beremiz: | build examples
 	$(call get_src_hg,build/beremiz)
-	$(call hg_get_rev_num,beremiz,build/beremiz/revision)
 	$(call tweak_beremiz_targets)
 	rm -rf examples/canopen_tests
 	mkdir -p examples/canopen_tests
