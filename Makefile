@@ -27,8 +27,9 @@
 
 version = 1.2-rc1
 
+src := $(shell dirname $(lastword $(MAKEFILE_LIST)))
 HGREMOTE ?= https://hg.beremiz.org/
-HGROOT ?= $(abspath $(CURDIR)/..)
+HGROOT ?= $(abspath $(src)/..)
 GITROOT := $(HGROOT)
 DIST =
 CPUS = 8
@@ -45,7 +46,6 @@ define get_runtime_libs
 	cp $(CROSS_COMPILE_LIBS_DIR)/libstdc++-6.dll $(1)
 endef
 
-src := $(shell dirname $(lastword $(MAKEFILE_LIST)))
 distfiles = $(src)/distfiles
 sfmirror = downloads
 tmp := $(shell mktemp -d)

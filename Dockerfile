@@ -1,8 +1,17 @@
 # Builds Beremiz windows installer
 
-# usage :
+# initialize :
 #   docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t beremiz_builder .
+#
+# build installer as-is :
 #   docker run -v ~/src:/home/devel/src -v ~/build/:/home/devel/build --rm beremiz_builder
+#
+# to use on code-build-test cycle :
+#   docker create --name current -v ~/src:/home/devel/src -v ~/build/:/home/devel/build -i -t beremiz_builder /bin/bash
+#   docker start -i current 
+#       # call build operations from here
+#   docker stop current
+#   docker rm current
 
 FROM ubuntu:xenial
 
