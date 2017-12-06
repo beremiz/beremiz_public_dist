@@ -27,12 +27,12 @@
 
 version = 1.2-rc1
 
-src := $(shell dirname $(lastword $(MAKEFILE_LIST)))
+src := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 HGREMOTE ?= https://hg.beremiz.org/
 HGROOT ?= $(abspath $(src)/..)
 GITROOT := $(HGROOT)
 DIST =
-CPUS = 8
+CPUS := `cat /proc/cpuinfo | grep -e 'processor\W*:\W*[[:digit:]]*' | nl -n ln | tail -n1 | cut -f1`
 BLKDEV=/dev/null
 
 
@@ -86,11 +86,6 @@ ifneq ("$(DIST)","")
 include $(src)/$(DIST).mk
 endif
 
-CUSTOM := public
-CUSTOM_DIR := $(src)
-
-include $(CUSTOM_DIR)/$(CUSTOM).mk
-
 build:
 	rm -rf build
 	mkdir -p build
@@ -143,98 +138,187 @@ wine = WINEPREFIX=$(tmp) wine
 pydir = build/python
 pysite = $(pydir)/Lib/site-packages
 
+OSSLVER=openssl-1.0.1p
+M2CRVER=M2Crypto-0.22.6rc2
+MINGPFX=i686-w64-mingw32-
+
 python: |build
 	rm -rf $(pydir)
 	mkdir -p $(pydir)
-
+	
 	# Python
-	$(call get_src_http,http://www.python.org/ftp/python/2.7.2,python-2.7.2.msi)\
+	$(call get_src_http,http://www.python.org/ftp/python/2.7.3,python-2.7.3.msi)\
 	$(msiexec) /qn /a $$dld TARGETDIR=.\\$(pydir)
-
-	# WxPython (needs running inno unpacker in wine)
+	
+	# WxPython 2.8 (needs running inno unpacker in wine)
 	$(call get_src_sf,innounp/innounp/innounp%200.36,innounp036.rar)\
 	unrar e $$dld innounp.exe $(tmp)
 	$(call get_src_sf,wxpython/wxPython/2.8.12.1,wxPython2.8-win32-unicode-2.8.12.1-py27.exe)\
 	$(wine) $(tmp)/innounp.exe -d$(tmp) -x $$dld
 	cp -R $(tmp)/\{code_GetPythonDir\}/* $(pydir)
 	cp -R $(tmp)/\{app\}/* $(pysite)
-
+	
+	# WxPython 3.0 (needs running inno unpacker in wine)
+	$(call get_src_sf,wxpython/wxPython/3.0.2.0,wxPython3.0-win32-3.0.2.0-py27.exe)\
+	$(wine) $(tmp)/innounp.exe -d$(tmp) -x $$dld
+	cp -R $(tmp)/\{code_GetPythonDir\}/* $(pydir)
+	cp -R $(tmp)/\{app\}/* $(pysite)
+	
 	# wxPython fails if VC9.0 bullshit is not fully here.
 	$(call get_src_http,http://download.microsoft.com/download/1/1/1/1116b75a-9ec3-481a-a3c8-1777b5381140,vcredist_x86.exe)\
 	cp $$dld $(tmp)
 	$(wine) $(tmp)/vcredist_x86.exe /qn /a
 	cp $(tmp)/drive_c/windows/winsxs/x86_Microsoft.VC90.CRT*/* $(pydir)
-
+	
 	# MathPlotLib
 	$(call get_src_http,https://github.com/downloads/matplotlib/matplotlib,matplotlib-1.2.0.win32-py2.7.exe)\
 	unzip -d $(tmp)/mathplotlib $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/mathplotlib/PLATLIB/* $(pysite)
-
+	
 	# pywin32
 	$(call get_src_sf,pywin32/pywin32/Build216,pywin32-216.win32-py2.7.exe)\
 	unzip -d $(tmp)/pw32 $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/pw32/PLATLIB/* $(pysite)
-
-	# zope.interface
-	$(call get_src_pypi,9d/2d/beb32519c0bd19bda4ac38c34db417d563ee698518e582f951d0b9e5898b,zope.interface-4.3.2-py2.7-win32.egg)\
+	
+	# zope.interface (twisted prereq)
+	$(call get_src_pypi,2.7/z/zope.interface,zope.interface-4.3.2-py2.7-win32.egg)\
 	unzip -d $(tmp) $$dld
 	cp -R $(tmp)/zope $(pysite)
-
+	
+	# six (pyopenssl prereq)
+	$(call get_src_pypi,py2.py3/s/six,six-1.11.0-py2.py3-none-any.whl)\
+	unzip -d $(tmp) $$dld 
+	cp -R $(tmp)/six.py $(pysite)
+	
+	# enum34 (cryptography prereq)
+	$(call get_src_pypi,source/e/enum34,enum34-1.1.6.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cp -R $(tmp)/enum34-1.1.6/enum $(pysite)
+	
+	# cryptography (pyopenssl prereq)
+	$(call get_src_pypi,cp27/c/cryptography,cryptography-1.0.2-cp27-none-win32.whl)\
+	unzip -d $(tmp) $$dld 
+	cp -R $(tmp)/cryptography $(pysite)
+	
+	# pyopenssl (twisted/ssl prereq)
+	$(call get_src_pypi,py2.py3/p/pyOpenSSL,pyOpenSSL-0.15.1-py2.py3-none-any.whl)\
+	unzip -d $(tmp) $$dld 
+	cp -R $(tmp)/OpenSSL $(pysite)
+	
+	# pyasn1 (service identity prereq)
+	$(call get_src_pypi,source/p/pyasn1,pyasn1-0.1.9.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cp -R $(tmp)/pyasn1-0.1.9/pyasn1 $(pysite)
+	
+	# pyasn1-modules (service identity prereq)
+	$(call get_src_pypi,source/p/pyasn1-modules,pyasn1-modules-0.0.8.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cp -R $(tmp)/pyasn1-modules-0.0.8/pyasn1_modules $(pysite)
+	
+	# characteristic (service identity prereq)
+	$(call get_src_pypi,source/c/characteristic,characteristic-14.3.0.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cp -R $(tmp)/characteristic-14.3.0/characteristic.py $(pysite)
+	
+	# service identity (twisted prereq)
+	$(call get_src_pypi,source/s/service_identity,service_identity-14.0.0.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cp -R $(tmp)/service_identity-14.0.0/service_identity $(pysite)
+	
+	# txaio (autobahn prereq)
+	$(call get_src_pypi,source/t/txaio,txaio-2.6.0.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cp -R $(tmp)/txaio-2.6.0/txaio $(pysite)
+	
+	# python-msgpack (autobahn prereq)
+	$(call get_src_pypi,cp27/m/msgpack-python,msgpack_python-0.4.8-cp27-cp27m-win32.whl)\
+	unzip -d $(tmp) $$dld 
+	cp -R $(tmp)/msgpack $(pysite)
+	
+	# u-msgpack-python (autobahn prereq)
+	$(call get_src_pypi,source/u/u-msgpack-python,u-msgpack-python-2.3.0.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cp -R $(tmp)/u-msgpack-python-2.3.0/umsgpack.py $(pysite)
+	
+	# cffi (cryptography prereq)
+	$(call get_src_pypi,cp27/c/cffi,cffi-1.2.1-cp27-none-win32.whl)\
+	unzip -d $(tmp) $$dld 
+	cp -R $(tmp)/cffi $(tmp)/_cffi_backend.pyd $(pysite)
+	
 	# Twisted
-	$(call get_src_pypi,2.7/T/Twisted,Twisted-11.0.0.winxp32-py2.7.msi)\
-	$(msiexec) /qn /a $$dld TARGETDIR=.\\$(pydir)
-
+	$(call get_src_pypi,cp27/T/Twisted,Twisted-15.4.0-cp27-none-win32.whl)\
+	unzip -d $(tmp) $$dld 
+	cp -R $(tmp)/twisted $(pysite)
+	
+	# Autobahn
+	$(call get_src_pypi,source/a/autobahn,autobahn-17.6.1.tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	for i in autobahn twisted; do cp -R $(tmp)/autobahn-17.6.1/$$i $(pysite); done
+	
 	# Nevow
 	$(call get_src_pypi,source/N/Nevow,Nevow-0.10.0.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
 	for i in nevow formless twisted; do cp -R $(tmp)/Nevow-0.10.0/$$i $(pysite); done
-
+	
 	# Numpy
 	$(call get_src_pypi,2.7/n/numpy,numpy-1.6.1.win32-py2.7.exe)\
 	unzip -d $(tmp)/np $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/np/PLATLIB/* $(pysite)
-
+	
 	# SimpleJson
 	$(call get_src_pypi,source/s/simplejson,simplejson-2.2.1.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
 	cp -R $(tmp)/simplejson-2.2.1/simplejson/ $(pysite)
-
+	
 	# Zeroconf
 	$(call get_src_pypi,6b/88/48dbe88b10098f98acef33218763c5630b0081c7fd0849ab4793b1e9b6d3,zeroconf-0.19.1-py2.py3-none-any.whl)\
 	unzip -d $(tmp)/zeroconf $$dld
 	cp -R $(tmp)/zeroconf/* $(pysite)
-
-	# Enum34
-	$(call get_src_pypi,c5/db/e56e6b4bbac7c4a06de1c50de6fe1ef3810018ae11732a50f15f62c7d050,enum34-1.1.6-py2-none-any.whl)\
-	unzip -d $(tmp)/enum34 $$dld
-	cp -R $(tmp)/enum34/* $(pysite)	
-
+	
 	# netifaces
 	$(call get_src_pypi,05/00/c719457bcb8f14f9a7b9244c3c5e203c40d041a364cf784cf554aaef8129,netifaces-0.10.6-py2.7-win32.egg)\
 	unzip -d $(tmp)/netifaces $$dld
 	cp -R $(tmp)/netifaces/* $(pysite)	
-
-	# Six
-	$(call get_src_pypi,67/4b/141a581104b1f6397bfa78ac9d43d8ad29a7ca43ea90a2d863fe3056e86a,six-1.11.0-py2.py3-none-any.whl)\
-	unzip -d $(tmp)/six $$dld
-	cp -R $(tmp)/six/* $(pysite)	
-
-
+	
 	# WxGlade
 	$(call get_src_http,https://bitbucket.org/wxglade/wxglade/get,034d891cc947.zip)\
 	unzip -d $(tmp) $$dld
 	mv $(tmp)/wxglade-wxglade-034d891cc947 $(pysite)/wxglade
-
+	
 	# Pyro
 	$(call get_src_pypi,source/P/Pyro,Pyro-3.9.1.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
 	mv $(tmp)/Pyro-3.9.1/Pyro $(pysite)
-
+	
+	# Build Openssl
+	$(call get_src_http,https://openssl.org/source,$(OSSLVER).tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cd $(tmp)/$(OSSLVER); \
+	CC=$(MINGPFX)gcc ./Configure mingw && \
+	make all build-shared CROSS_COMPILE=$(MINGPFX) SHARED_LDFLAGS=-static-libgcc
+	
+	# Build M2crypto
+	$(call get_src_pypi,source/M/M2Crypto,$(M2CRVER).tar.gz)\
+	tar -C $(tmp) -xzf $$dld
+	cd $(tmp)/$(M2CRVER); \
+	patch -p1 < $(src)/M2Crypto-mingw-cross-compile-fix.patch && \
+	PYTHONLIB=$(abspath $(pydir))/libs \
+	PYTHONINC=$(abspath $(pydir))/include/ \
+	MINGCCPREFIX=$(MINGPFX) \
+	    python setup.py build build_ext \
+	        --openssl=$(tmp)/$(OSSLVER) -cmingw32
+	
+	# Copy openssl dlls directly in M2Crypto package directory
+	cp -a $(tmp)/$(OSSLVER)/*.dll $(tmp)/$(M2CRVER)/build/lib.win32-2.7/M2Crypto 
+	
+	# Move result into python site packages
+	mv $(tmp)/$(M2CRVER)/build/lib.win32-2.7/M2Crypto $(pysite)
+	
 	# Lxml
 	$(call get_src_pypi,2.7/l/lxml,lxml-3.2.3.win32-py2.7.exe)\
 	unzip -d $(tmp)/lxml $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
 	cp -R $(tmp)/lxml/PLATLIB/* $(pysite)
-
+	
 	touch $@
 
 matiecdir = build/matiec
@@ -248,10 +332,10 @@ matiec: |build
 	rm -rf $(matiecdir)
 	mkdir -p $(matiecdir)
 	mv $(tmp)/matiec/*.exe $(matiecdir)
-
+	
 	# install necessary shared libraries from local cross-compiler
 	$(call get_runtime_libs,$(matiecdir))
-
+	
 	mv $(tmp)/matiec/lib $(matiecdir)
 	touch $@
 
@@ -261,7 +345,7 @@ examples: |build
 
 beremiz: | build examples
 	$(call get_src_hg,build/beremiz)
-	$(call tweak_beremiz_targets)
+	$(call tweak_beremiz_source)
 	rm -rf examples/canopen_tests
 	mkdir -p examples/canopen_tests
 	mv build/beremiz/tests/canopen_* examples/canopen_tests
