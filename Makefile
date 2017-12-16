@@ -154,15 +154,15 @@ python: |build
 	$(call get_src_sf,innounp/innounp/innounp%200.36,innounp036.rar)\
 	unrar e $$dld innounp.exe $(tmp)
 	$(call get_src_sf,wxpython/wxPython/2.8.12.1,wxPython2.8-win32-unicode-2.8.12.1-py27.exe)\
-	$(wine) $(tmp)/innounp.exe -d$(tmp) -x $$dld
-	cp -R $(tmp)/\{code_GetPythonDir\}/* $(pydir)
-	cp -R $(tmp)/\{app\}/* $(pysite)
+	$(wine) $(tmp)/innounp.exe -d$(tmp)/wx28 -x $$dld
+	cp -R $(tmp)/wx28/\{code_GetPythonDir\}/* $(pydir)
+	cp -R $(tmp)/wx28/\{app\}/* $(pysite)
 	
 	# WxPython 3.0 (needs running inno unpacker in wine)
 	$(call get_src_sf,wxpython/wxPython/3.0.2.0,wxPython3.0-win32-3.0.2.0-py27.exe)\
-	$(wine) $(tmp)/innounp.exe -d$(tmp) -x $$dld
-	cp -R $(tmp)/\{code_GetPythonDir\}/* $(pydir)
-	cp -R $(tmp)/\{app\}/* $(pysite)
+	$(wine) $(tmp)/innounp.exe -d$(tmp)/wx30 -x $$dld
+	cp -R $(tmp)/wx30/\{code_GetPythonDir\}/* $(pydir)
+	cp -R $(tmp)/wx30/\{app\}/* $(pysite)
 	
 	# wxPython fails if VC9.0 bullshit is not fully here.
 	$(call get_src_http,http://download.microsoft.com/download/1/1/1/1116b75a-9ec3-481a-a3c8-1777b5381140,vcredist_x86.exe)\
@@ -181,79 +181,79 @@ python: |build
 	cp -R $(tmp)/pw32/PLATLIB/* $(pysite)
 	
 	# zope.interface (twisted prereq)
-	$(call get_src_pypi,2.7/z/zope.interface,zope.interface-4.3.2-py2.7-win32.egg)\
+	$(call get_src_pypi,9d/2d/beb32519c0bd19bda4ac38c34db417d563ee698518e582f951d0b9e5898b,zope.interface-4.3.2-py2.7-win32.egg)\
 	unzip -d $(tmp) $$dld
 	cp -R $(tmp)/zope $(pysite)
 	
 	# six (pyopenssl prereq)
-	$(call get_src_pypi,py2.py3/s/six,six-1.11.0-py2.py3-none-any.whl)\
+	$(call get_src_pypi,67/4b/141a581104b1f6397bfa78ac9d43d8ad29a7ca43ea90a2d863fe3056e86a,six-1.11.0-py2.py3-none-any.whl)\
 	unzip -d $(tmp) $$dld 
 	cp -R $(tmp)/six.py $(pysite)
 	
 	# enum34 (cryptography prereq)
-	$(call get_src_pypi,source/e/enum34,enum34-1.1.6.tar.gz)\
+	$(call get_src_pypi,bf/3e/31d502c25302814a7c2f1d3959d2a3b3f78e509002ba91aea64993936876,enum34-1.1.6.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
 	cp -R $(tmp)/enum34-1.1.6/enum $(pysite)
 	
 	# cryptography (pyopenssl prereq)
-	$(call get_src_pypi,cp27/c/cryptography,cryptography-1.0.2-cp27-none-win32.whl)\
+	$(call get_src_pypi,17/08/04dc376411968ac21f2e11a8d7d70e936a654172567672fa79710a137bd9,cryptography-2.1.4-cp27-cp27m-win32.whl)\
 	unzip -d $(tmp) $$dld 
 	cp -R $(tmp)/cryptography $(pysite)
 	
 	# pyopenssl (twisted/ssl prereq)
-	$(call get_src_pypi,py2.py3/p/pyOpenSSL,pyOpenSSL-0.15.1-py2.py3-none-any.whl)\
+	$(call get_src_pypi,79/db/7c0cfe4aa8341a5fab4638952520d8db6ab85ff84505e12c00ea311c3516,pyOpenSSL-17.5.0-py2.py3-none-any.whl)\
 	unzip -d $(tmp) $$dld 
 	cp -R $(tmp)/OpenSSL $(pysite)
 	
 	# pyasn1 (service identity prereq)
-	$(call get_src_pypi,source/p/pyasn1,pyasn1-0.1.9.tar.gz)\
+	$(call get_src_pypi,eb/3d/b7d0fdf4a882e26674c68c20f40682491377c4db1439870f5b6f862f76ed,pyasn1-0.4.2.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
-	cp -R $(tmp)/pyasn1-0.1.9/pyasn1 $(pysite)
+	cp -R $(tmp)/pyasn1-0.4.2/pyasn1 $(pysite)
 	
 	# pyasn1-modules (service identity prereq)
-	$(call get_src_pypi,source/p/pyasn1-modules,pyasn1-modules-0.0.8.tar.gz)\
+	$(call get_src_pypi,ab/76/36ab0e099e6bd27ed95b70c2c86c326d3affa59b9b535c63a2f892ac9f45,pyasn1-modules-0.2.1.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
-	cp -R $(tmp)/pyasn1-modules-0.0.8/pyasn1_modules $(pysite)
+	cp -R $(tmp)/pyasn1-modules-0.2.1/pyasn1_modules $(pysite)
 	
 	# characteristic (service identity prereq)
-	$(call get_src_pypi,source/c/characteristic,characteristic-14.3.0.tar.gz)\
+	$(call get_src_pypi,dc/66/54b7a4758ea44fbc93895c7745060005272560fb2c356f2a6f7448ef9a80,characteristic-14.3.0.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
 	cp -R $(tmp)/characteristic-14.3.0/characteristic.py $(pysite)
 	
 	# service identity (twisted prereq)
-	$(call get_src_pypi,source/s/service_identity,service_identity-14.0.0.tar.gz)\
+	$(call get_src_pypi,de/2a/cab6e30be82c8fcd2339ef618036720eda954cf05daef514e386661c9221,service_identity-17.0.0.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
-	cp -R $(tmp)/service_identity-14.0.0/service_identity $(pysite)
+	cp -R $(tmp)/service_identity-17.0.0/src/service_identity $(pysite)
 	
 	# txaio (autobahn prereq)
-	$(call get_src_pypi,source/t/txaio,txaio-2.6.0.tar.gz)\
+	$(call get_src_pypi,d6/95/d0c67304515f352342bc8fd14e5a3e7ca924134608acb730916073b18464,txaio-2.8.2.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
-	cp -R $(tmp)/txaio-2.6.0/txaio $(pysite)
+	cp -R $(tmp)/txaio-2.8.2/txaio $(pysite)
 	
 	# python-msgpack (autobahn prereq)
-	$(call get_src_pypi,cp27/m/msgpack-python,msgpack_python-0.4.8-cp27-cp27m-win32.whl)\
+	$(call get_src_pypi,59/ca/b8048e184a2edb5b3cd46f38be130e87cbce77f4168ed62344bc33df3e1b,msgpack_python-0.4.8-cp27-cp27m-win32.whl)\
 	unzip -d $(tmp) $$dld 
 	cp -R $(tmp)/msgpack $(pysite)
 	
 	# u-msgpack-python (autobahn prereq)
-	$(call get_src_pypi,source/u/u-msgpack-python,u-msgpack-python-2.3.0.tar.gz)\
+	$(call get_src_pypi,b8/ff/5730f61767d5acecac103343d66ebf631ebd672fa14e50472f05545749c2,u-msgpack-python-2.4.1.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
-	cp -R $(tmp)/u-msgpack-python-2.3.0/umsgpack.py $(pysite)
+	cp -R $(tmp)/u-msgpack-python-2.4.1/umsgpack.py $(pysite)
 	
 	# cffi (cryptography prereq)
-	$(call get_src_pypi,cp27/c/cffi,cffi-1.2.1-cp27-none-win32.whl)\
+	$(call get_src_pypi,5e/67/01ae6ae50d168d3b92f2a80bf62e07537171d0a1938c8bceb7e64d36829f,cffi-1.11.2-cp27-cp27m-win32.whl)\
 	unzip -d $(tmp) $$dld 
 	cp -R $(tmp)/cffi $(tmp)/_cffi_backend.pyd $(pysite)
 	
 	# Twisted
-	$(call get_src_pypi,cp27/T/Twisted,Twisted-15.4.0-cp27-none-win32.whl)\
+	$(call get_src_pypi,fe/cb/97504d68c2f4300fb121f700cc2fae10e1856ba043e964acfab02e120835,Twisted-17.9.0-cp27-cp27m-win32.whl)\
 	unzip -d $(tmp) $$dld 
 	cp -R $(tmp)/twisted $(pysite)
 	
 	# Autobahn
-	$(call get_src_pypi,source/a/autobahn,autobahn-17.6.1.tar.gz)\
+	$(call get_src_pypi,e4/2e/01a64212b1eb580d601fa20f146c962235e3493795f46e3b254597ec635d,autobahn-17.10.1.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
-	for i in autobahn twisted; do cp -R $(tmp)/autobahn-17.6.1/$$i $(pysite); done
+	cp -R $(tmp)/autobahn-17.10.1/autobahn $(pysite)
 	
 	# Nevow
 	$(call get_src_pypi,source/N/Nevow,Nevow-0.10.0.tar.gz)\
@@ -261,9 +261,9 @@ python: |build
 	for i in nevow formless twisted; do cp -R $(tmp)/Nevow-0.10.0/$$i $(pysite); done
 	
 	# Numpy
-	$(call get_src_pypi,2.7/n/numpy,numpy-1.6.1.win32-py2.7.exe)\
-	unzip -d $(tmp)/np $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
-	cp -R $(tmp)/np/PLATLIB/* $(pysite)
+	$(call get_src_pypi,fd/32/196073188f5b8b464e0fabb470f971fa5dcd91b55726a43b40b008212358,numpy-1.13.3-2-cp27-none-win32.whl)\
+	unzip -d $(tmp) $$dld
+	cp -R $(tmp)/numpy/* $(pysite)
 	
 	# SimpleJson
 	$(call get_src_pypi,source/s/simplejson,simplejson-2.2.1.tar.gz)\
@@ -286,9 +286,14 @@ python: |build
 	mv $(tmp)/wxglade-wxglade-034d891cc947 $(pysite)/wxglade
 	
 	# Pyro
-	$(call get_src_pypi,source/P/Pyro,Pyro-3.9.1.tar.gz)\
+	$(call get_src_pypi,61/68/0978adae315261b87acd216517c2c7f00780396e4d1426c5412458c6a28f,Pyro-3.16.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
-	mv $(tmp)/Pyro-3.9.1/Pyro $(pysite)
+	mv $(tmp)/Pyro-3.16/Pyro $(pysite)
+	
+	# Lxml
+	$(call get_src_pypi,c7/e6/26a600d9828554ca9de35d3d1daf3779028bea37025f3dd25e9d58d63bac,lxml-4.1.1-cp27-cp27m-win32.whl)\
+	unzip -d $(tmp) $$dld
+	cp -R $(tmp)/lxml/* $(pysite)
 	
 	# Build Openssl
 	$(call get_src_http,https://openssl.org/source,$(OSSLVER).tar.gz)\
@@ -313,11 +318,6 @@ python: |build
 	
 	# Move result into python site packages
 	mv $(tmp)/$(M2CRVER)/build/lib.win32-2.7/M2Crypto $(pysite)
-	
-	# Lxml
-	$(call get_src_pypi,2.7/l/lxml,lxml-3.2.3.win32-py2.7.exe)\
-	unzip -d $(tmp)/lxml $$dld ; [ $$? -eq 1 ] #silence error unziping .exe
-	cp -R $(tmp)/lxml/PLATLIB/* $(pysite)
 	
 	touch $@
 
