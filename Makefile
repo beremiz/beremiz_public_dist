@@ -138,10 +138,6 @@ wine = WINEPREFIX=$(tmp) wine
 pydir = build/python
 pysite = $(pydir)/Lib/site-packages
 
-OSSLVER=openssl-1.0.1p
-M2CRVER=M2Crypto-0.22.6rc2
-MINGPFX=i686-w64-mingw32-
-
 python: |build
 	rm -rf $(pydir)
 	mkdir -p $(pydir)
@@ -295,15 +291,28 @@ python: |build
 	unzip -d $(tmp) $$dld
 	cp -R $(tmp)/lxml/* $(pysite)
 	
+	touch $@
+
+	
+OSSLVER=openssl-1.0.1p
+MINGPFX=i686-w64-mingw32-
+
+openssl:
 	# Build Openssl
 	$(call get_src_http,https://openssl.org/source,$(OSSLVER).tar.gz)\
 	tar -C $(tmp) -xzf $$dld
 	cd $(tmp)/$(OSSLVER); \
 	CC=$(MINGPFX)gcc ./Configure mingw && \
 	make all build-shared CROSS_COMPILE=$(MINGPFX) SHARED_LDFLAGS=-static-libgcc
+	mv $(tmp)/$(OSSLVER) .;
 	
+	touch $@
+	
+M2CRVER=M2Crypto-0.22.5
+
+m2crypto: openssl
 	# Build M2crypto
-	$(call get_src_pypi,source/M/M2Crypto,$(M2CRVER).tar.gz)\
+	$(call get_src_pypi,54/f5/6fa9bca4a18cc36c0c84c73d41d8e521c8cb70f077b11297efcd985242a6,M2Crypto-0.22.5.tar.gz)\
 	tar -C $(tmp) -xzf $$dld
 	cd $(tmp)/$(M2CRVER); \
 	patch -p1 < $(src)/M2Crypto-mingw-cross-compile-fix.patch && \
@@ -311,10 +320,10 @@ python: |build
 	PYTHONINC=$(abspath $(pydir))/include/ \
 	MINGCCPREFIX=$(MINGPFX) \
 	    python setup.py build build_ext \
-	        --openssl=$(tmp)/$(OSSLVER) -cmingw32
+	        --openssl=$(CURDIR)/$(OSSLVER) -cmingw32
 	
 	# Copy openssl dlls directly in M2Crypto package directory
-	cp -a $(tmp)/$(OSSLVER)/*.dll $(tmp)/$(M2CRVER)/build/lib.win32-2.7/M2Crypto 
+	cp -a $(CURDIR)/$(OSSLVER)/*.dll $(tmp)/$(M2CRVER)/build/lib.win32-2.7/M2Crypto 
 	
 	# Move result into python site packages
 	mv $(tmp)/$(M2CRVER)/build/lib.win32-2.7/M2Crypto $(pysite)
@@ -369,7 +378,7 @@ canfestival: mingw
 	cd $(CFbuild); find . -name "*.o" -exec rm {} ';' #remove object files only
 	touch $@
 
-targets=python mingw matiec beremiz
+targets=python m2crypto mingw matiec beremiz
 Beremiz-$(version).exe: $(targets) $(src)/license.txt $(src)/install.nsi $(targets_ex)
 	sed -e 's/\$$BVERSION/$(version)/g' $(src)/license.txt > build/license.txt
 	sed -e 's/\$$BVERSION/$(version)/g' $(src)/install.nsi |\
