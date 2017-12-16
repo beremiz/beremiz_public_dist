@@ -21,11 +21,12 @@ apt-get install -y --no-install-recommends \
      mercurial       \
      mingw-w64       \
      nsis            \
+     swig            \
      texinfo         \
      unrar           \
+     unzip           \
      wget            \
-     xvfb            \
-     unzip
+     xvfb
 
      echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
      echo ttf-mscorefonts-installer msttcorefonts/present-mscorefonts-eula note | debconf-set-selections
