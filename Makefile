@@ -106,12 +106,15 @@ mingw: |build
 	$(call get_mingw,w32api/w32api-5.0.1,w32api-5.0.1-mingw32-dev.tar.xz)
 	# mingw runtime
 	$(call get_mingw,mingwrt/mingwrt-5.0.1,mingwrt-5.0.1-mingw32-dll.tar.xz)
+	$(call get_mingw,mingwrt/mingwrt-5.0.1,libmingwex-5.0.1-mingw32-dll-0.tar.xz)
+	$(call get_mingw,isl/isl-0.18,libisl-0.18-1-mingw32-dll-15.tar.xz)
 	# mingw headers and lib
 	$(call get_mingw,mingwrt/mingwrt-5.0.1,mingwrt-5.0.1-mingw32-dev.tar.xz)
 	# binutils
 	$(call get_mingw,binutils/binutils-2.28,binutils-2.28-1-mingw32-bin.tar.xz)
 	# C compiler
 	$(call get_mingw,gcc/Version6/gcc-6.3.0,gcc-core-6.3.0-1-mingw32-bin.tar.xz)
+	$(call get_mingw,gcc/Version6/gcc-6.3.0,libgcc-6.3.0-1-mingw32-dll-1.tar.xz)
 	# dependencies
 	$(call get_mingw,gmp/gmp-6.1.2,libgmp-6.1.2-2-mingw32-dll-10.tar.xz)
 	$(call get_mingw,mpc/mpc-1.0.3,libmpc-1.0.3-1-mingw32-dll-3.tar.xz)
@@ -259,7 +262,7 @@ python: |build
 	# Numpy
 	$(call get_src_pypi,fd/32/196073188f5b8b464e0fabb470f971fa5dcd91b55726a43b40b008212358,numpy-1.13.3-2-cp27-none-win32.whl)\
 	unzip -d $(tmp) $$dld
-	cp -R $(tmp)/numpy/* $(pysite)
+	cp -R $(tmp)/numpy $(pysite)
 	
 	# SimpleJson
 	$(call get_src_pypi,source/s/simplejson,simplejson-2.2.1.tar.gz)\
@@ -269,12 +272,12 @@ python: |build
 	# Zeroconf
 	$(call get_src_pypi,6b/88/48dbe88b10098f98acef33218763c5630b0081c7fd0849ab4793b1e9b6d3,zeroconf-0.19.1-py2.py3-none-any.whl)\
 	unzip -d $(tmp)/zeroconf $$dld
-	cp -R $(tmp)/zeroconf/* $(pysite)
+	cp -R $(tmp)/zeroconf/*.py* $(pysite)
 	
 	# netifaces
 	$(call get_src_pypi,05/00/c719457bcb8f14f9a7b9244c3c5e203c40d041a364cf784cf554aaef8129,netifaces-0.10.6-py2.7-win32.egg)\
 	unzip -d $(tmp)/netifaces $$dld
-	cp -R $(tmp)/netifaces/* $(pysite)	
+	cp -R $(tmp)/netifaces/*.py* $(pysite)	
 	
 	# WxGlade
 	$(call get_src_http,https://bitbucket.org/wxglade/wxglade/get,034d891cc947.zip)\
@@ -289,7 +292,7 @@ python: |build
 	# Lxml
 	$(call get_src_pypi,c7/e6/26a600d9828554ca9de35d3d1daf3779028bea37025f3dd25e9d58d63bac,lxml-4.1.1-cp27-cp27m-win32.whl)\
 	unzip -d $(tmp) $$dld
-	cp -R $(tmp)/lxml/* $(pysite)
+	cp -R $(tmp)/lxml $(pysite)
 	
 	touch $@
 
