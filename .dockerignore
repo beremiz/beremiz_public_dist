@@ -1,4 +1,2 @@
-.?*
-Dockerfile
-Vagrantfile
-*.log
+*
+!provision_focal64.sh

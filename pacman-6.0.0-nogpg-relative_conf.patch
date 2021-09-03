@@ -1,0 +1,48 @@
+Binary files pacman-6.0.0.orig/lib/libalpm/.dload.c.swp and pacman-6.0.0/lib/libalpm/.dload.c.swp differ
+Binary files pacman-6.0.0.orig/lib/libalpm/.error.c.swp and pacman-6.0.0/lib/libalpm/.error.c.swp differ
+Binary files pacman-6.0.0.orig/lib/libalpm/.hook.c.swp and pacman-6.0.0/lib/libalpm/.hook.c.swp differ
+Binary files pacman-6.0.0.orig/lib/libalpm/.trans.c.swp and pacman-6.0.0/lib/libalpm/.trans.c.swp differ
+diff -ruN pacman-6.0.0.orig/lib/libalpm/util.c pacman-6.0.0/lib/libalpm/util.c
+--- pacman-6.0.0.orig/lib/libalpm/util.c	2021-05-20 03:38:45.948119900 +0000
++++ pacman-6.0.0/lib/libalpm/util.c	2021-08-26 17:26:09.719703392 +0000
+@@ -652,6 +652,11 @@
+ 		/* use fprintf instead of _alpm_log to send output through the parent */
+ 		if(chroot(handle->root) != 0) {
+ 			fprintf(stderr, _("could not change the root directory (%s)\n"), strerror(errno));
++			fprintf(stderr, "cmd : %s", cmd);
++			for(int i=0; argv[i]; i++){
++				fprintf(stderr, " %s", argv[i]);
++			}
++			fprintf(stderr, "\n");
+ 			exit(1);
+ 		}
+ 		if(chdir("/") != 0) {
+Binary files pacman-6.0.0.orig/lib/libalpm/.util.c.swp and pacman-6.0.0/lib/libalpm/.util.c.swp differ
+Binary files pacman-6.0.0.orig/.meson.build.swp and pacman-6.0.0/.meson.build.swp differ
+diff -ruN pacman-6.0.0.orig/src/pacman/conf.c pacman-6.0.0/src/pacman/conf.c
+--- pacman-6.0.0.orig/src/pacman/conf.c	2021-05-20 03:38:45.964786500 +0000
++++ pacman-6.0.0/src/pacman/conf.c	2021-08-26 17:27:32.228666450 +0000
+@@ -477,7 +477,7 @@
+ 		}
+ 
+ 		/* now parse out and store actual flag if it is valid */
+-		if(strcmp(value, "Never") == 0) {
++		if(1 || strcmp(value, "Never") == 0) {
+ 			if(package) {
+ 				SLUNSET(ALPM_SIG_PACKAGE);
+ 			}
+@@ -1071,9 +1071,11 @@
+ 			break;
+ 		default:
+ 			for(gindex = 0; gindex < globbuf.gl_pathc; gindex++) {
++				char buf[1024];
++				snprintf(buf, 1023, "%s%s",ROOTDIR, globbuf.gl_pathv[gindex]);
+ 				pm_printf(ALPM_LOG_DEBUG, "config file %s, line %d: including %s\n",
+-						file, linenum, globbuf.gl_pathv[gindex]);
+-				ret = parse_ini(globbuf.gl_pathv[gindex], _parse_directive, data);
++						file, linenum, buf);
++				ret = parse_ini(buf, _parse_directive, data);
+ 				if(ret) {
+ 					goto cleanup;
+ 				}
+Binary files pacman-6.0.0.orig/src/pacman/.conf.c.swp and pacman-6.0.0/src/pacman/.conf.c.swp differ

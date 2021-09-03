@@ -1,10 +1,4 @@
 .*~
 .*\.swp
 distfiles/.*[.](?!.*md5$).*$
-examples/.*
-build/.*
-beremiz
-canfestival
-matiec
-mingw
-python
+distfiles/http/.*

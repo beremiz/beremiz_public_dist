@@ -1,11 +1,12 @@
 
-SetCompressor /SOLID /FINAL lzma
+;SetCompressor /SOLID /FINAL lzma
+SetCompress off
 SetDatablockOptimize off
 
 !include MUI2.nsh
 
 ; MUI Settings
-!define MUI_ICON "build\beremiz\images\brz.ico"
+!define MUI_ICON "installer\beremiz\images\brz.ico"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Header\nsis.bmp" ; optional
 !define MUI_ABORTWARNING
@@ -13,7 +14,7 @@ SetDatablockOptimize off
 ; Documentation
 !insertmacro MUI_PAGE_WELCOME
 !define MUI_LICENSEPAGE_CHECKBOX
-!insertmacro MUI_PAGE_LICENSE "build/license.txt"
+!insertmacro MUI_PAGE_LICENSE "installer/license.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -27,18 +28,11 @@ Name "Beremiz $BVERSION"
 OutFile "Beremiz-$BVERSION.exe"
 InstallDir "$PROGRAMFILES\Beremiz"
 !define PYTHONW_EXE "$INSTDIR\python\pythonw.exe"
-!define BEREMIZ_EXE '"$INSTDIR\beremiz\Beremiz.py" -u "http://www.beremiz.org/updateinfo/$BVERSION/" $BEXTENSIONS'
+!define BEREMIZ_EXE '"$INSTDIR\beremiz\Beremiz.py" -u "http://www.beremiz.org/updateinfo/$BVERSION/"'
 
 Section "Beremiz" 
   SetOutPath $INSTDIR
-  File /r /x debian /x *.pyc "build/*"
-SectionEnd
-
-Section "Examples" 
-  CreateDirectory "$DESKTOP\BeremizExamples"
-  SetOutPath "$DESKTOP\BeremizExamples"
-  File /r "examples/*"
-  CreateShortCut "$DESKTOP\BeremizExamples\canopen_tests\CAN_TCP_Server.lnk" "$INSTDIR\CanFestival-3\drivers\can_tcp_win32\can_tcp_win32_server.exe" "" "" 0 SW_SHOWNORMAL "" "Simple CAN emulation over TCP (for CANopen testing)"
+  File /r /x debian /x *.pyc "installer/*"
 SectionEnd
 
 Section "Install"
@@ -56,7 +50,7 @@ SectionEnd
 Section "Shortcuts"
   SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\Beremiz"
-  SetOutPath "$INSTDIR\mingw\bin"
+  SetOutPath "$INSTDIR\msys32\bin"
   CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "${PYTHONW_EXE}" '"$INSTDIR\beremiz\plcopeneditor.py"' "$INSTDIR\beremiz\images\poe.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Uninstall.lnk" "$INSTDIR\uninstall.exe"

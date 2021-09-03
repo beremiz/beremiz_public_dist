@@ -1,4 +1,0 @@
-
-targets_ex+= canfestival
-
-
