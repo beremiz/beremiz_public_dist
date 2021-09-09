@@ -50,7 +50,7 @@ SectionEnd
 Section "Shortcuts"
   SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\Beremiz"
-  SetOutPath "$INSTDIR\msys32\bin"
+  SetOutPath "$INSTDIR\mingw32\bin"
   CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "${PYTHONW_EXE}" '"$INSTDIR\beremiz\plcopeneditor.py"' "$INSTDIR\beremiz\images\poe.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Uninstall.lnk" "$INSTDIR\uninstall.exe"

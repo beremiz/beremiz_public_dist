@@ -11,10 +11,13 @@ installer:
 
 CURDIR:=$(shell pwd)
 PACMANPFX=$(CURDIR)/pacman
-msysdir=installer/msys32
+msysdir=msys32
 MSYS_ROOT=$(CURDIR)/$(msysdir)
 
-pacman/.stamp: | installer
+mingw32dir=$(msysdir)/mingw32
+mingw32finaldir=installer/mingw32
+
+pacman/.stamp:
 	rm -rf pacman pacman-6.0.0
 	$(call get_src_http,https://sources.archlinux.org/other/pacman,pacman-6.0.0.tar.xz)\
 	tar -xJf $$dld
@@ -25,17 +28,23 @@ pacman/.stamp: | installer
 	touch $@
 
 define pacman_install
-LD_LIBRARY_PATH=$(PACMANPFX)/usr/lib/x86_64-linux-gnu/ fakeroot pacman/usr/bin/pacman -S $(1) --arch i686 --noconfirm -cachedir $(distfiles)
+LD_LIBRARY_PATH=$(PACMANPFX)/usr/lib/x86_64-linux-gnu/ fakeroot pacman/usr/bin/pacman -S $(1) --arch i686 --noconfirm --cachedir $(distfiles)
 endef
 
-$(msysdir)/.stamp: pacman/.stamp | installer
-	rm -rf installer/msys32
+$(msysdir)/.stamp: pacman/.stamp 
+	rm -rf $(msysdir)
 	$(call get_src_http,http://repo.msys2.org/distrib/i686,msys2-base-i686-20210705.tar.xz)\
-	tar -C installer -xJf $$dld
-	$(call pacman_install, mingw-w64-i686-gcc)
-	$(call pacman_install, make)
+	tar -xJf $$dld
 	touch $@
 
+$(mingw32dir)/.stamp: $(msysdir)/.stamp 
+	$(call pacman_install, mingw-w64-i686-gcc)
+	touch $@
+
+# this takes just a fraction of msys2, but for now only this is needed
+$(mingw32finaldir): $(mingw32dir)/.stamp | installer
+	rm -rf $(mingw32finaldir)
+	cp -a $(mingw32dir) $(mingw32finaldir)
 
 msiexec = WINEPREFIX=$(tmp) $(XVFBRUN) msiexec
 wine = WINEPREFIX=$(tmp) $(XVFBRUN) wine
@@ -68,7 +77,7 @@ $(pydir)/.stamp: | installer
         autobahn            \
         msgpack_python      \
         u-msgpack-python    \
-        zeroconf=0.20.0     \
+        zeroconf2           \
         lxml                \
         sslpsk              \
         pycountry           \
@@ -79,8 +88,6 @@ $(pydir)/.stamp: | installer
         Pyro                \
         gnosis              
 	
-	# # service identity (twisted prereq) ?
-	# # python sslpsk (to have PYROPSK)
 	# # FIXME : this uses 'some' binaries of openssl that forces us to stick to python 2.7.13
 	# # FIXME : (from here : https://www.npcglib.org/~stathis/blog/precompiled-openssl/)
 	# # FIXME : build it, and use openssl binaries from https://github.com/python/cpython-bin-deps/tree/openssl-bin-1.0.2k
@@ -124,7 +131,7 @@ $(ide_revisions): revisions.txt
 	cp $< $@ 
 
 Beremiz-build: Beremiz-$(TIMESTAMP)_build
-Beremiz-$(TIMESTAMP)_build: $(msysdir)/.stamp $(pydir)/.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
+Beremiz-$(TIMESTAMP)_build: $(mingw32finaldir) $(pydir)/.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
 	touch $@
 
 Beremiz-archive: Beremiz-$(TIMESTAMP).zip
