@@ -77,7 +77,7 @@ $(pydir)/.stamp: | installer
         autobahn            \
         msgpack_python      \
         u-msgpack-python    \
-        zeroconf2           \
+        zeroconf-py2compat  \
         lxml                \
         sslpsk              \
         pycountry           \
