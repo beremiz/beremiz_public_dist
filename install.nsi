@@ -1,6 +1,6 @@
 
-;SetCompressor /SOLID /FINAL lzma
-SetCompress off
+SetCompressor /SOLID /FINAL lzma
+;SetCompress off
 SetDatablockOptimize off
 
 !include MUI2.nsh
