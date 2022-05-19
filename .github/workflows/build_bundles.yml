@@ -1,10 +1,10 @@
 name: Build distributable bundles
 
+# This overrides HG revision IDs in Makefile
 env:
-	# This overrides HG revision IDs in Makefile
-	beremiz_revisionid: 9fb2ded4f1988440faf546488ee83373825330f4
-	matiec_revisionid: 2a25f4dbf4e2b1e017a3a583db7dede4771fe523
-	CanFestival-3_revisionid: 12a05e422666c738d1312259703f80150c747cb5
+    beremiz_revisionid: 9fb2ded4f1988440faf546488ee83373825330f4
+    matiec_revisionid: 2a25f4dbf4e2b1e017a3a583db7dede4771fe523
+    CanFestival-3_revisionid: 12a05e422666c738d1312259703f80150c747cb5
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
       with:
           path: beremiz_public_dist
 
-	# repositories are directly checked out wher Makerfile expect them
+    # repositories are directly checked out wher Makerfile expect them
     - uses: actions/checkout@v3
       with:
           repository: beremiz/beremiz
@@ -46,13 +46,13 @@ jobs:
         touch build/sources/matiec_src
         touch build/sources/CanFestival-3_src
         cat >> build/revisions.txt <<EOF
-			beremiz_public_dist ${{ github.sha }}
-			beremiz ${{ env.beremiz_revisionid }}
-			matiec ${{ env.matiec_revisionid }}
-			CanFestival-3 ${{ env.CanFestival-3_revisionid }}
-		EOF
+        beremiz_public_dist ${{ github.sha }}
+        beremiz ${{ env.beremiz_revisionid }}
+        matiec ${{ env.matiec_revisionid }}
+        CanFestival-3 ${{ env.CanFestival-3_revisionid }}
+        EOF
 
-	# TODO: cache docker image, find files to hash for a key
+    # TODO: cache docker image, find files to hash for a key
     - name: Create docker image
       run: |
         cd beremiz_public_dist
