@@ -66,10 +66,7 @@ jobs:
     - name: Run build in docker
       run: |
         cd beremiz_public_dist
-        beremiz_revisionid=${{ env.beremiz_revisionid }} \
-        matiec_revisionid=${{ env.matiec_revisionid }} \
-        CanFestival-3_revisionid=${{ env.CanFestival-3_revisionid }} \
-        ./build_in_docker.sh
+        beremiz_revisionid=${{ env.beremiz_revisionid }} matiec_revisionid=${{ env.matiec_revisionid }} CanFestival-3_revisionid=${{ env.CanFestival-3_revisionid }} ./build_in_docker.sh
 
     - name: Upload built artifact
       uses: actions/upload-artifact@v3
