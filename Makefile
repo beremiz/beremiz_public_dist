@@ -63,7 +63,7 @@ endef
 $(foreach project,$(OWN_PROJECTS),$(eval $(call get_revision,$(project))))
 
 define get_revisionid
-$(1)_revisionid=$(shell hg -R $(HGROOT)/$(1) id -i -r $($(1)_revision))
+$(1)_revisionid?=$(shell hg -R $(HGROOT)/$(1) id -i -r $($(1)_revision))
 endef
 $(foreach project,$(OWN_PROJECTS),$(eval $(call get_revisionid,$(project))))
 
