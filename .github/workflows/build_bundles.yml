@@ -1,0 +1,79 @@
+name: Build distributable bundles
+
+env:
+	# This overrides HG revision IDs in Makefile
+	beremiz_revisionid: 9fb2ded4f1988440faf546488ee83373825330f4
+	matiec_revisionid: 2a25f4dbf4e2b1e017a3a583db7dede4771fe523
+	CanFestival-3_revisionid: 12a05e422666c738d1312259703f80150c747cb5
+
+on:
+  push:
+    branches: [ default ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+          path: beremiz_public_dist
+
+	# repositories are directly checked out wher Makerfile expect them
+    - uses: actions/checkout@v3
+      with:
+          repository: beremiz/beremiz
+          ref: ${{ env.beremiz_revisionid }}
+          path: build/sources/beremiz_${{ env.beremiz_revisionid }}
+
+    - uses: actions/checkout@v3
+      with:
+          repository: beremiz/matiec
+          ref: ${{ env.matiec_revisionid }}
+          path: build/sources/matiec_${{ env.matiec_revisionid }}
+
+    - uses: actions/checkout@v3
+      with:
+          repository: beremiz/CanFestival-3
+          ref: ${{ env.CanFestival-3_revisionid }}
+          path: build/sources/CanFestival-3_${{ env.CanFestival-3_revisionid }}
+
+    - name: Touch expected Makfile targets to shortcut HG checkout
+      run: |
+        touch build/sources/beremiz_src
+        touch build/sources/matiec_src
+        touch build/sources/CanFestival-3_src
+        cat >> build/revisions.txt <<EOF
+			beremiz_public_dist ${{ github.sha }}
+			beremiz ${{ env.beremiz_revisionid }}
+			matiec ${{ env.matiec_revisionid }}
+			CanFestival-3 ${{ env.CanFestival-3_revisionid }}
+		EOF
+
+	# TODO: cache docker image, find files to hash for a key
+    - name: Create docker image
+      run: |
+        cd beremiz_public_dist
+        ./build_docker_image.sh
+
+    - name: Create docker container
+      run: |
+        cd beremiz_public_dist
+        ./create_docker_container.sh ${{ github.workspace }}/build
+
+    - name: Run tests in docker
+      run: |
+        cd beremiz_public_dist
+        ./build_in_docker.sh
+
+    - name: Upload built artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows_bundles
+        path: |
+          ${{ github.workspace }}/build/Beremiz-*.exe
+          ${{ github.workspace }}/build/Beremiz-*.zip
+        retention-days: 5
+
