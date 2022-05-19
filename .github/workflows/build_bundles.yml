@@ -63,9 +63,12 @@ jobs:
         cd beremiz_public_dist
         ./create_docker_container.sh ${{ github.workspace }}/build
 
-    - name: Run tests in docker
+    - name: Run build in docker
       run: |
         cd beremiz_public_dist
+        beremiz_revisionid=${{ env.beremiz_revisionid }} \
+        matiec_revisionid=${{ env.matiec_revisionid }} \
+        CanFestival-3_revisionid=${{ env.CanFestival-3_revisionid }} \
         ./build_in_docker.sh
 
     - name: Upload built artifact
