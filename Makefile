@@ -23,8 +23,6 @@ distfiles = $(src)/distfiles
 sfmirror = downloads
 tmp := $(shell rm -rf $${TMPDIR:-/tmp}/beremiz_dist_build_tmp.* ; mktemp -d -t beremiz_dist_build_tmp.XXXXXXXXXX)
 
-$(info $(shell env))
-
 define hg_get_archive
 	test -d $(HGROOT)/`basename $(1)` || hg --cwd $(HGROOT) clone $(HGREMOTE)`basename $(1)`;\
 	hg -R $(HGROOT)/`basename $(1)` archive $(2) $(1);\
