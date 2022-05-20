@@ -22,7 +22,7 @@ RUN useradd -m -u $UID -g $GID -s /bin/bash $UNAME
 # easy to remember 'build' alias to invoke main makefile
 ARG OWNDIRBASENAME=beremiz_public_dist
 ENV OWNDIRBASENAME ${OWNDIRBASENAME}
-RUN /bin/echo -e '#!/bin/bash\necho XXXX \$*\nmake -f /home/'$UNAME'/src/'$OWNDIRBASENAME'/Makefile \$*' > /usr/local/bin/build
+RUN /bin/echo -e '#!/bin/bash\necho XXXX $$*\nmake -f /home/'$UNAME'/src/'$OWNDIRBASENAME'/Makefile $$*' > /usr/local/bin/build
 RUN chmod +x /usr/local/bin/build
 
 USER $UNAME
