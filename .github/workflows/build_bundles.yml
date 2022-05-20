@@ -55,11 +55,26 @@ jobs:
         canfestival ${{ env.canfestival_revisionid }}
         EOF
 
-    # TODO: cache docker image, find files to hash for a key
-    - name: Create docker image
+    - name: Cache docker image
+      id: cache-docker
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-docker
+      with:
+        path: /tmp/latest.tar
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('beremiz_public_dist/Dockerfile', 'beremiz_public_dist/*.sh') }}
+
+    - if: ${{ steps.cache-docker.outputs.cache-hit == false }}
+      name: Create docker image
       run: |
         cd beremiz_public_dist
         ./build_docker_image.sh
+        docker image save --output="/tmp/latest.tar" beremiz_public_builder
+
+    - if: ${{ steps.cache-docker.outputs.cache-hit != false }}
+      name: Re-use docker image
+      run: |
+        docker image load --input="/tmp/latest.tar" 
 
     - name: Create docker container
       run: |
