@@ -26,22 +26,25 @@ jobs:
       with:
           repository: beremiz/beremiz
           ref: ${{ env.beremiz_revisionid }}
-          path: build/sources/beremiz_${{ env.beremiz_revisionid }}
+          path: build/sources/beremiz
 
     - uses: actions/checkout@v3
       with:
           repository: beremiz/matiec
           ref: ${{ env.matiec_revisionid }}
-          path: build/sources/matiec_${{ env.matiec_revisionid }}
+          path: build/sources/matiec
 
     - uses: actions/checkout@v3
       with:
           repository: beremiz/canfestival
           ref: ${{ env.canfestival_revisionid }}
-          path: build/sources/canfestival_${{ env.canfestival_revisionid }}
+          path: build/sources/canfestival
 
     - name: Touch expected Makfile targets to shortcut HG checkout
       run: |
+        touch build/sources/beremiz_${{ env.beremiz_revisionid }}
+        touch build/sources/matiec_${{ env.matiec_revisionid }}
+        touch build/sources/canfestival_${{ env.canfestival_revisionid }}
         touch build/sources/beremiz_src
         touch build/sources/matiec_src
         touch build/sources/canfestival_src
