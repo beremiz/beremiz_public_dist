@@ -75,6 +75,8 @@ sources/$(1)_src: sources/$(1)_$($(1)_revisionid)
 	touch $$@
 
 sources/$(1)_$($(1)_revisionid): | sources
+	echo "Checkout HG source $(1)_$($(1)_revisionid)"
+	env
 	rm -rf sources/$(1)*
 	$(call get_src_hg,sources/$(1),-r $($(1)_revisionid))
 	touch $$@
@@ -89,6 +91,7 @@ echo -n $(1) "revision is: "; hg -R $(HGROOT)/$(1) id -r $($(1)_revisionid);
 endef
 
 revisions.txt: $(src)/revisions.txt own_sources
+	echo "Generate revisions.txt"
 	echo "\n******* PACKAGE REVISIONS ********\n" > revisions.txt
 	(echo -n "beremiz_dist revision is: "; hg -R $(src) id;) >> revisions.txt
 	($(foreach project,$(OWN_PROJECTS),$(call show_revision_details,$(project)))) >> revisions.txt
