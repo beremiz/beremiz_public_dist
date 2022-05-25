@@ -2,7 +2,7 @@ name: Build distributable bundles
 
 # This overrides HG revision IDs in Makefile
 env:
-    beremiz_revisionid: af89aeb89a79b487171bef86394cd97a3897d498
+    beremiz_revisionid: 26c78255389e5cc0247caf1fdd16157e8163384d
     matiec_revisionid: 2a25f4dbf4e2b1e017a3a583db7dede4771fe523
     canfestival_revisionid: 12a05e422666c738d1312259703f80150c747cb5
 
