@@ -21,10 +21,6 @@ jobs:
 
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-          path: beremiz_public_dist
-
     # repositories are directly checked out where Makerfile expects them to be
     - uses: actions/checkout@v3
       with:
@@ -60,3 +56,8 @@ jobs:
         canfestival ${{ env.canfestival_revisionid }}
         EOF
 
+    - name: Upload source artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: source_package
+        path: build
