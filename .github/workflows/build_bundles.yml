@@ -1,61 +1,18 @@
-name: Build distributable bundles
-
-# This overrides HG revision IDs in Makefile
-env:
-    beremiz_revisionid: 9fb2ded4f1988440faf546488ee83373825330f4
-    matiec_revisionid: 2a25f4dbf4e2b1e017a3a583db7dede4771fe523
-    canfestival_revisionid: 12a05e422666c738d1312259703f80150c747cb5
+name: Build windows installer in Docker.
 
 on:
-  push:
-    branches: [ default ]
+  workflow_dispatch:
+  # push:
+  #   branches: [ default ]
 
 jobs:
+  sources:
+    uses: ./.github/workflow/prep_sources
 
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-          path: beremiz_public_dist
-
-    # repositories are directly checked out wher Makerfile expect them
-    - uses: actions/checkout@v3
-      with:
-          repository: beremiz/beremiz
-          ref: ${{ env.beremiz_revisionid }}
-          path: build/sources/beremiz
-
-    - uses: actions/checkout@v3
-      with:
-          repository: beremiz/matiec
-          ref: ${{ env.matiec_revisionid }}
-          path: build/sources/matiec
-
-    - uses: actions/checkout@v3
-      with:
-          repository: beremiz/canfestival
-          ref: ${{ env.canfestival_revisionid }}
-          path: build/sources/canfestival
-
-    - name: Touch expected Makfile targets to shortcut HG checkout
-      run: |
-        touch build/sources/beremiz_${{ env.beremiz_revisionid }}
-        touch build/sources/matiec_${{ env.matiec_revisionid }}
-        touch build/sources/canfestival_${{ env.canfestival_revisionid }}
-        touch build/sources/beremiz_src
-        touch build/sources/matiec_src
-        touch build/sources/canfestival_src
-        touch build/own_sources
-        cat >> build/revisions.txt <<EOF
-        beremiz_public_dist ${{ github.sha }}
-        beremiz ${{ env.beremiz_revisionid }}
-        matiec ${{ env.matiec_revisionid }}
-        canfestival ${{ env.canfestival_revisionid }}
-        EOF
-
     - name: Cache docker image
       id: cache-docker
       uses: actions/cache@v3
@@ -85,10 +42,11 @@ jobs:
     - name: Run build in docker
       run: |
         cd beremiz_public_dist
+        # override HG revision IDs in Makefile
         ./build_in_docker.sh \
-            beremiz_revisionid=${{ env.beremiz_revisionid }} \
-            matiec_revisionid=${{ env.matiec_revisionid }} \
-            canfestival_revisionid=${{ env.canfestival_revisionid }}
+            beremiz_revisionid=${{ needs.sources.outputs.beremiz_revisionid }} \
+            matiec_revisionid=${{ needs.sources.outputs.matiec_revisionid }} \
+            canfestival_revisionid=${{ needs.sources.outputs.canfestival_revisionid }}
 
     - name: Upload built artifact
       uses: actions/upload-artifact@v3
