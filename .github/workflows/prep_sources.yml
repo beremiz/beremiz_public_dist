@@ -1,23 +1,24 @@
 name: Prepare sources
 
-env:
-    beremiz_revisionid: c3847f87bde2d520b856e353498cb2bad9d83911
-    matiec_revisionid: ba00e2b18e7335c03c011e1c6b2a5d99fc3571c3
-    canfestival_revisionid: 12a05e422666c738d1312259703f80150c747cb5
-
 on:
   workflow_call:
     outputs:
       beremiz_revisionid:
-        value: ${{ env.beremiz_revisionid }}
+        value: ${{ jobs.get_sources.env.beremiz_revisionid }}
       matiec_revisionid:
-        value: ${{ env.matiec_revisionid }}
+        value: ${{ jobs.get_sources.env.matiec_revisionid }}
       canfestival_revisionid:
-        value: ${{ env.canfestival_revisionid }}
+        value: ${{ jobs.get_sources.env.canfestival_revisionid }}
 
 jobs:
   get_sources:
     runs-on: ubuntu-latest
+
+    env:
+        beremiz_revisionid: c3847f87bde2d520b856e353498cb2bad9d83911
+        matiec_revisionid: ba00e2b18e7335c03c011e1c6b2a5d99fc3571c3
+        canfestival_revisionid: 12a05e422666c738d1312259703f80150c747cb5
+
 
     steps:
     - uses: actions/checkout@v3
