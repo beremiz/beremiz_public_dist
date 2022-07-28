@@ -7,7 +7,7 @@ on:
 
 jobs:
   sources:
-    uses: ./.github/workflow/prep_sources.yml
+    uses: ./.github/workflows/prep_sources.yml
 
   build:
     runs-on: ubuntu-latest
