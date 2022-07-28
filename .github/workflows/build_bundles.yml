@@ -10,6 +10,7 @@ jobs:
     uses: ./.github/workflows/prep_sources.yml
 
   build:
+    needs: sources
     runs-on: ubuntu-latest
 
     steps:
