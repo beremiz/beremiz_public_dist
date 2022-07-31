@@ -1,4 +1,4 @@
 beremiz tip
-CanFestival-3 tip
+canfestival tip
 Modbus tip
 matiec tip

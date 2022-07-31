@@ -1,5 +1,9 @@
 # Win32 only distribution
 
+main_target: Beremiz-installer
+
+include $(src)/windows_installer.mk
+
 OWN_PROJECTS_EX=canfestival
 
 ide_targets_from_dist: canfestival

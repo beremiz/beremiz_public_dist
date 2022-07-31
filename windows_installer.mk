@@ -14,6 +14,8 @@ PACMANPFX=$(CURDIR)/pacman
 msysdir=msys32
 MSYS_ROOT=$(CURDIR)/$(msysdir)
 
+XVFBRUN ?= xvfb-run
+
 mingw32dir=$(msysdir)/mingw32
 mingw32finaldir=installer/mingw32
 

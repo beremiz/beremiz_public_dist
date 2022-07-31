@@ -6,7 +6,7 @@
 #   build_in_docker.sh : use case example
 #   provision_bionic64.sh : prerequisites
 
-all: Beremiz-installer
+all: main_target
 
 DIST ?= win32
 
@@ -16,8 +16,6 @@ HGROOT ?= $(abspath $(src)/..)
 GITROOT := $(HGROOT)
 CPUS := `cat /proc/cpuinfo | grep -e 'processor\W*:\W*[[:digit:]]*' | nl -n ln | tail -n1 | cut -f1`
 BLKDEV=/dev/null
-
-XVFBRUN ?= xvfb-run
 
 distfiles = $(src)/distfiles
 sfmirror = downloads
@@ -48,8 +46,6 @@ endef
 get_src_pypi=$(call get_src_http,https://pypi.python.org/packages/$(1),$(2))
 
 get_src_sf=$(call get_src_http,https://$(sfmirror).sourceforge.net/project/$(1),$(2))
-
-include $(src)/windows_installer.mk
 
 ifneq ("$(DIST)","")
 include $(src)/$(DIST).mk
@@ -96,7 +92,7 @@ revisions.txt: $(src)/revisions.txt own_sources
 	echo "\n******* PACKAGE REVISIONS ********\n" > revisions.txt
 	(echo -n "beremiz_dist revision is: "; hg -R $(src) id;) >> revisions.txt
 	($(foreach project,$(OWN_PROJECTS),$(call show_revision_details,$(project)))) >> revisions.txt
-	bash -c 'hg -R $(src) st | ( if read ; then echo -e "\n******* MODIFIED LPCDISTRO ********\n" ; hg -R $(src) st ; fi ) >> revisions.txt'
+	bash -c 'hg -R $(src) st | ( if read ; then echo -e "\n******* beremiz_public_dist IS MODIFIED ********\n" ; hg -R $(src) st ; fi ) >> revisions.txt'
 
 
 
