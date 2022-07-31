@@ -1,4 +1,4 @@
-name: Build windows installer in Docker.
+name: Build windows installer in Docker
 
 on:
   workflow_dispatch:
