@@ -51,7 +51,7 @@ ifneq ("$(DIST)","")
 include $(src)/$(DIST).mk
 endif
 
-OWN_PROJECTS=beremiz matiec $(OWN_PROJECTS_EX)
+OWN_PROJECTS=beremiz matiec canfestival
 
 define get_revision
 $(1)_revision?=$(lastword $(shell grep $(1) $(src)/revisions.txt))
@@ -82,6 +82,16 @@ $(foreach project,$(OWN_PROJECTS),$(eval $(call make_src_rule,$(project))))
 
 own_sources: $(foreach project,$(OWN_PROJECTS), sources/$(project)_src)
 	touch $@
+
+all_sources: own_sources sources/open62541_src
+	touch $@
+
+sources/open62541_src:
+	rm -rf sources/open62541
+	$(call get_src_http,https://github.com/open62541/open62541/archive/refs/tags,v1.3.2.tar.gz)\
+	tar -xzf $$dld
+	mv open62541-1.3.2 sources/open62541
+	
 
 define show_revision_details
 echo -n $(1) "revision is: "; hg -R $(HGROOT)/$(1) id -r $($(1)_revisionid);

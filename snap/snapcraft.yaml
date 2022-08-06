@@ -2,7 +2,9 @@ name: beremiz
 version: '1.3-beta2'
 summary: Beremiz
 description: |
-  Beremiz is an integrated development environment for machine automation. It is Free Software, conforming to IEC-61131 among other standards.
+  Beremiz is Free and Open Source PLC. It brings Free Software IDE (GPL) and Runtime (LGPL) for machine automation, conforming to IEC-61131.
+# TODO icon
+
 
 grade: devel
 confinement: devmode
@@ -14,10 +16,11 @@ parts:
     # This part provides all python2 dependencies, including interpreter
     # More particularily, it builds latest PIP supporting python2 from git
     # and uses it to collect and buid other Beremiz dependencies.
-
+    #
     # rational:
     #  - python plugin doesn't support python2 anymore on core20+
     #  - attempts to get python2+pip+virtualenv in a core20 based snap failed
+
     plugin: nil
     source: https://github.com/pypa/pip/archive/refs/tags/20.3.4.tar.gz
     build-packages:
@@ -30,34 +33,35 @@ parts:
     stage-packages:
       - python2
       - python-setuptools
-      # libs reclaimed by snapcraft at the end of wxPython build
-      # TODO: test if still necessary since using "extensions: [gnome-3-38]"
-      - libgtk-3-0
-      - libegl1
-      - libgl1
-      - libsm6
-      - libxtst6
 
     override-build: |
       # For some reasons site-packages needs to be created and 
       # added to PYTHONPATH during PIP (own) build.
-      # Strangely, not anymore when snap is executed.
+      # Apparently not anymore when snap is executed.
       mkdir $SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages
-      PYTHONPATH=$SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages $SNAPCRAFT_PART_INSTALL/usr/bin/python2 $SNAPCRAFT_PART_SRC/setup.py install --prefix $SNAPCRAFT_PART_INSTALL/usr
-      PYTHONPATH=$SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages $SNAPCRAFT_PART_INSTALL/usr/bin/pip install \
-          lxml \
-          future \
-          matplotlib \
-          zeroconf2 \
-          enum34 \
-          pyro \
-          sslpsk \
-          posix_spawn \
-          twisted \
-          nevow \
-          autobahn \
-          click \
-          opcua \
+      PYTHONPATH=$SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages \
+        $SNAPCRAFT_PART_INSTALL/usr/bin/python2 $SNAPCRAFT_PART_SRC/setup.py \
+            install --prefix $SNAPCRAFT_PART_INSTALL/usr
+      PYTHONPATH=$SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages \
+        $SNAPCRAFT_PART_INSTALL/usr/bin/pip install \
+          lxml                \
+          future              \
+          matplotlib          \
+          msgpack_python      \
+          u-msgpack-python    \
+          zeroconf2           \
+          enum34              \
+          pyro                \
+          sslpsk              \
+          posix_spawn         \
+          twisted             \
+          nevow               \
+          autobahn            \
+          click               \
+          opcua               \
+          pycountry           \
+          fonttools           \
+          Brotli              \
           wxPython==4.1.1
 
   beremiz:
@@ -73,7 +77,6 @@ parts:
       - linux-libc-dev
       - libgcc-9-dev
       - libgcc-s1
-
     override-build: |
       cp -a $SNAPCRAFT_PART_SRC $SNAPCRAFT_PART_INSTALL/beremiz
 
@@ -91,7 +94,30 @@ parts:
     override-build: |
       autoreconf -i && ./configure && make
       cp -a $SNAPCRAFT_PART_BUILD $SNAPCRAFT_PART_INSTALL/matiec
+
+  open62541:
+    plugin: nil
+    source: open62541
+    source-type: local
+    build-packages:
+      - build-essential
+      - cmake
+    override-build: |
+      mkdir build && cd build && cmake .. && make
+      cp -a $SNAPCRAFT_PART_BUILD $SNAPCRAFT_PART_INSTALL/open62541
       
+  inkscape:
+    # CLI only, used in SVGHMI build
+    # GUI fails to launch couldn't find a way
+    plugin: nil
+    stage-packages:
+      - inkscape
+      - libgtk-3-0 
+      # libgtk3 needs to be explicitely given
+      # otherwise wxGtk doesn't start, with this error :
+      # libgtk-3.so.0: undefined symbol: pango_font_family_get_face
+      # ... why ?
+
   revisiontxt:
     # Makefile generated "revisions.txt"
     plugin: nil
@@ -102,13 +128,20 @@ parts:
 
 apps:
   ide:
+    # Launcher for the IDE
     environment:
       SYSROOT: $SNAP
     command: usr/bin/python2 $SNAP/beremiz/Beremiz.py
     extensions: [gnome-3-38]
 
   beremiz:
+    # Beremiz Command Line interface
     environment:
       SYSROOT: $SNAP
     command: usr/bin/python2 $SNAP/beremiz/Beremiz_cli.py
-
+ 
+  runtime:
+    # Standalone runtime
+    environment:
+      SYSROOT: $SNAP
+    command: usr/bin/python2 $SNAP/beremiz/Beremiz_service.py

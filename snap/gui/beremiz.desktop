@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Beremiz IDE
+Comment=IEC-61131 Open Source PLC programming
+Exec=beremiz.ide %f
+Icon=${SNAP}/meta/gui/beremiz.png
