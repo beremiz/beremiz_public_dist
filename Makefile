@@ -51,7 +51,7 @@ ifneq ("$(DIST)","")
 include $(src)/$(DIST).mk
 endif
 
-OWN_PROJECTS=beremiz matiec canfestival
+OWN_PROJECTS=beremiz matiec canfestival Modbus
 
 define get_revision
 $(1)_revision?=$(lastword $(shell grep $(1) $(src)/revisions.txt))

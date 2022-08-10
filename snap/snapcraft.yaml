@@ -95,6 +95,17 @@ parts:
       autoreconf -i && ./configure && make
       cp -a $SNAPCRAFT_PART_BUILD $SNAPCRAFT_PART_INSTALL/matiec
 
+  modbus:
+    plugin: nil
+    source: Modbus
+    source-type: local
+    build-packages:
+      - build-essential
+      - automake
+    override-build: |
+      make
+      cp -a $SNAPCRAFT_PART_BUILD $SNAPCRAFT_PART_INSTALL/Modbus
+
   open62541:
     plugin: nil
     source: open62541
