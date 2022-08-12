@@ -9,6 +9,10 @@ on:
         value: ${{ jobs.get_sources.env.matiec_revisionid }}
       canfestival_revisionid:
         value: ${{ jobs.get_sources.env.canfestival_revisionid }}
+      Modbus_revisionid:
+        value: ${{ jobs.get_sources.env.Modbus_revisionid }}
+      open62541_revisionid:
+        value: ${{ jobs.get_sources.env.opem62541_revisionid }}
 
 jobs:
   get_sources:
@@ -18,6 +22,8 @@ jobs:
         beremiz_revisionid: c3847f87bde2d520b856e353498cb2bad9d83911
         matiec_revisionid: ba00e2b18e7335c03c011e1c6b2a5d99fc3571c3
         canfestival_revisionid: 12a05e422666c738d1312259703f80150c747cb5
+        Modbus_revisionid: 75ba7cb15908411e71bf0e7b66651d182f347747
+        open62541_revisionid: ff73268829359639531ff02905c889f73a77b408
 
 
     steps:
@@ -40,20 +46,38 @@ jobs:
           ref: ${{ env.canfestival_revisionid }}
           path: build/sources/canfestival
 
+    - uses: actions/checkout@v3
+      with:
+          repository: beremiz/Modbus
+          ref: ${{ env.Modbus_revisionid }}
+          path: build/sources/Modbus
+
+    - uses: actions/checkout@v3
+      with:
+          repository: open62541/open62541
+          ref: ${{ env.open62541_revisionid }}
+          path: build/sources/open62541
+
     - name: Touch expected Makfile targets to shortcut HG checkout
       run: |
         touch build/sources/beremiz_${{ env.beremiz_revisionid }}
         touch build/sources/matiec_${{ env.matiec_revisionid }}
         touch build/sources/canfestival_${{ env.canfestival_revisionid }}
+        touch build/sources/Modbus_${{ env.Modbus_revisionid }}
+        touch build/sources/open62541_${{ env.open62541_revisionid }}
         touch build/sources/beremiz_src
         touch build/sources/matiec_src
         touch build/sources/canfestival_src
+        touch build/sources/Modbus_src
+        touch build/sources/open62541_src
         touch build/own_sources
         cat >> build/revisions.txt <<EOF
         beremiz_public_dist ${{ github.sha }}
         beremiz ${{ env.beremiz_revisionid }}
         matiec ${{ env.matiec_revisionid }}
         canfestival ${{ env.canfestival_revisionid }}
+        Modbus ${{ env.Modbus_revisionid }}
+        open62541 ${{ env.open62541_revisionid }}
         EOF
 
     - name: Upload source artifact
