@@ -22,6 +22,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: source_package
+        path: build
 
     - name: Cache docker image
       id: cache-docker
