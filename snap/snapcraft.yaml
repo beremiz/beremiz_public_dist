@@ -33,6 +33,7 @@ parts:
     stage-packages:
       - python2
       - python-setuptools
+      - python-lxml
 
     override-build: |
       # For some reasons site-packages needs to be created and 
@@ -44,7 +45,6 @@ parts:
             install --prefix $SNAPCRAFT_PART_INSTALL/usr
       PYTHONPATH=$SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages \
         $SNAPCRAFT_PART_INSTALL/usr/bin/pip install \
-          lxml                \
           future              \
           matplotlib          \
           msgpack_python      \
@@ -156,3 +156,4 @@ apps:
     environment:
       SYSROOT: $SNAP
     command: usr/bin/python2 $SNAP/beremiz/Beremiz_service.py
+
