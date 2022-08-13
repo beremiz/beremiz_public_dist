@@ -87,7 +87,7 @@ The script [build_in_docker.sh](build_in_docker.sh) is used for that purpose.
 Note: 'build directory' must exist before calling build_in_docker.sh, otherwise
 Docker will create it as root user. Be sure to create it again if you delete it.
 
-Resulting installer is Beremiz-1.2.exe in 'build directory'. 
+Resulting installer is Beremiz-${timestamp}.exe in 'build directory'. 
 
 ### Manhole ###
 
@@ -119,5 +119,11 @@ hg clone https://hg.beremiz.org/beremiz_public_dist
 cd ~/build
 make -f ~/src/beremiz_public_dist/Makefile DIST=snap
 
+```
+Resulting snap package is sources/beremiz_${version}_${platform}.snap.
+It can be installed this way:
+
+```
+sudo snap install sources/beremiz_1.3-beta2_amd64.snap --dangerous --devmode
 ```
 
