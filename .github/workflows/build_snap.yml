@@ -27,6 +27,7 @@ jobs:
 
     - name: Move snap dir in build/sources
       run: |
+        ls -R
         mv beremiz_public_dist/snap build/sources
         ls build/sources
 
