@@ -14,16 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download source artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: source_package
-
     - uses: actions/checkout@v3
       with:
         # checkout directly in build/sources so that
         # sources dirs are aside snap dir
         path: build/sources
+
+    - name: Download source artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: source_package
 
     - name: Invoke snapcraft build
       uses: snapcore/action-build@v1
