@@ -71,7 +71,7 @@ jobs:
         touch build/sources/Modbus_src
         touch build/sources/open62541_src
         touch build/own_sources
-        cat >> build/revisions.txt <<EOF
+        cat >> build/sources/revisions.txt <<EOF
         beremiz_public_dist ${{ github.sha }}
         beremiz ${{ env.beremiz_revisionid }}
         matiec ${{ env.matiec_revisionid }}
