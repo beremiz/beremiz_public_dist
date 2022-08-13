@@ -86,7 +86,7 @@ own_sources: $(foreach project,$(OWN_PROJECTS), sources/$(project)_src)
 all_sources: own_sources sources/open62541_src
 	touch $@
 
-sources/open62541_src:
+sources/open62541_src: | sources
 	rm -rf sources/open62541
 	$(call get_src_http,https://github.com/open62541/open62541/archive/refs/tags,v1.3.2.tar.gz)\
 	tar -xzf $$dld
@@ -100,7 +100,7 @@ endef
 revisions.txt: $(src)/revisions.txt own_sources
 	echo "Generate revisions.txt"
 	echo "\n******* PACKAGE REVISIONS ********\n" > revisions.txt
-	(echo -n "beremiz_dist revision is: "; hg -R $(src) id;) >> revisions.txt
+	(echo -n "beremiz_public_dist revision is: "; hg -R $(src) id;) >> revisions.txt
 	($(foreach project,$(OWN_PROJECTS),$(call show_revision_details,$(project)))) >> revisions.txt
 	bash -c 'hg -R $(src) st | ( if read ; then echo -e "\n******* beremiz_public_dist IS MODIFIED ********\n" ; hg -R $(src) st ; fi ) >> revisions.txt'
 
