@@ -18,12 +18,17 @@ jobs:
       with:
         # checkout directly in build/sources so that
         # sources dirs are aside snap dir
-        path: build/sources
+        path: beremiz_public_dist
 
     - name: Download source artifact
       uses: actions/download-artifact@v3
       with:
         name: source_package
+
+    - name: Move snap dir in build/sources
+      run: |
+        mv beremiz_public_dist/snap build/sources
+        ls build/sources
 
     - name: Invoke snapcraft build
       uses: snapcore/action-build@v1
