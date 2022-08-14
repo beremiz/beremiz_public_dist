@@ -24,7 +24,9 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: source_package
-        path: build
+
+    - name: untar files
+      run: tar -xvf build.tar
 
     - name: Move snap dir in build/sources
       run: |

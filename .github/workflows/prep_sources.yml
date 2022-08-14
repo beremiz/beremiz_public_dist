@@ -70,8 +70,11 @@ jobs:
         open62541 ${{ env.open62541_revisionid }}
         EOF
 
+    - name: Tar files
+      run: tar -cvf build.tar build
+
     - name: Upload source artifact
       uses: actions/upload-artifact@v3
       with:
         name: source_package
-        path: build
+        path: build.tar

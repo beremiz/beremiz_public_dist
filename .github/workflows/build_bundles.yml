@@ -22,7 +22,9 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: source_package
-        path: build
+
+    - name: untar files
+      run: tar -xvf build.tar
 
     - name: Cache docker image
       id: cache-docker
