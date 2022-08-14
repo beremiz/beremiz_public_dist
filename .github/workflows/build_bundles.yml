@@ -14,9 +14,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-          path: beremiz_public_dist
 
     - name: Download source artifact
       uses: actions/download-artifact@v3
@@ -24,7 +21,7 @@ jobs:
         name: source_package
 
     - name: untar files
-      run: tar -xvf build.tar
+      run: tar -xvf sources.tar
 
     - name: Cache docker image
       id: cache-docker
