@@ -2,17 +2,7 @@ name: Prepare sources
 
 on:
   workflow_call:
-    outputs:
-      beremiz_revisionid:
-        value: ${{ jobs.get_sources.env.beremiz_revisionid }}
-      matiec_revisionid:
-        value: ${{ jobs.get_sources.env.matiec_revisionid }}
-      canfestival_revisionid:
-        value: ${{ jobs.get_sources.env.canfestival_revisionid }}
-      Modbus_revisionid:
-        value: ${{ jobs.get_sources.env.Modbus_revisionid }}
-      open62541_revisionid:
-        value: ${{ jobs.get_sources.env.opem62541_revisionid }}
+
 
 jobs:
   get_sources:
@@ -58,13 +48,13 @@ jobs:
           ref: ${{ env.open62541_revisionid }}
           path: build/sources/open62541
 
-    - name: Touch expected Makfile targets to shortcut HG checkout
+    - name: Keep Makfile satisfied and generate revisions.txt
       run: |
-        touch build/sources/beremiz_${{ env.beremiz_revisionid }}
-        touch build/sources/matiec_${{ env.matiec_revisionid }}
-        touch build/sources/canfestival_${{ env.canfestival_revisionid }}
-        touch build/sources/Modbus_${{ env.Modbus_revisionid }}
-        touch build/sources/open62541_${{ env.open62541_revisionid }}
+        touch build/sources/beremiz_stamp
+        touch build/sources/matiec_stamp
+        touch build/sources/canfestival_stamp
+        touch build/sources/Modbus_stamp
+        touch build/sources/open62541_stamp
         touch build/sources/beremiz_src
         touch build/sources/matiec_src
         touch build/sources/canfestival_src

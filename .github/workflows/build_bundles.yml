@@ -55,11 +55,11 @@ jobs:
         cd beremiz_public_dist
         # override HG revision IDs in Makefile
         ./build_in_docker.sh \
-            beremiz_revisionid=${{ needs.sources.outputs.beremiz_revisionid }} \
-            matiec_revisionid=${{ needs.sources.outputs.matiec_revisionid }} \
-            canfestival_revisionid=${{ needs.sources.outputs.canfestival_revisionid }} \
-            Modbus_revisionid=${{ needs.sources.outputs.Modbus_revisionid }} \
-            open62541_revisionid=${{ needs.sources.outputs.open62541_revisionid }}
+            beremiz_revisionid=stamp \
+            matiec_revisionid=stamp \
+            canfestival_revisionid=stamp \
+            Modbus_revisionid=stamp \
+            open62541_revisionid=stamp
 
     - name: Upload built artifact
       uses: actions/upload-artifact@v3
