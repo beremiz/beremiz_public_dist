@@ -28,11 +28,10 @@ jobs:
     - name: untar files
       run: tar -xvf build.tar
 
-    - name: Move snap dir in build/sources
+    - name: Move snap dir and revisions.txt in build/sources
       run: |
-        ls -R
         mv beremiz_public_dist/snap build/sources
-        ls build/sources
+        mv build/revisions.txt build/sources/revisions.txt
 
     - name: Invoke snapcraft build
       uses: snapcore/action-build@v1
