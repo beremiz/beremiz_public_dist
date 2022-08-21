@@ -15,7 +15,8 @@ HGREMOTE ?= REMOTE_HG_DISABLED
 HGROOT ?= $(abspath $(src)/..)
 GITROOT := $(HGROOT)
 CPUS := `cat /proc/cpuinfo | grep -e 'processor\W*:\W*[[:digit:]]*' | nl -n ln | tail -n1 | cut -f1`
-BLKDEV=/dev/null
+
+BVERSION=$(shell python2 sources/beremiz/version.py)
 
 distfiles = $(src)/distfiles
 sfmirror = downloads

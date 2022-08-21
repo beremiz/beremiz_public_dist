@@ -1,4 +1,4 @@
-TIMESTAMP=$(shell date '+%y.%m.%d')
+BVERSION=$(shell python2 sources/beremiz/version.py)
 
 CROSS_COMPILE=i686-w64-mingw32
 CROSS_COMPILE_LIBS_DIR=$(shell dirname $(shell $(CROSS_COMPILE)-gcc -print-libgcc-file-name))
@@ -132,21 +132,21 @@ ide_revisions = installer/revisions.txt
 $(ide_revisions): revisions.txt
 	cp $< $@ 
 
-Beremiz-build: Beremiz-$(TIMESTAMP)_build
-Beremiz-$(TIMESTAMP)_build: $(mingw32finaldir) $(pydir)/.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
+Beremiz-build: Beremiz-$(BVERSION)_build
+Beremiz-$(BVERSION)_build: $(mingw32finaldir) $(pydir)/.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
 	touch $@
 
-Beremiz-archive: Beremiz-$(TIMESTAMP).zip
+Beremiz-archive: Beremiz-$(BVERSION).zip
 
-Beremiz-installer: Beremiz-$(TIMESTAMP).exe
+Beremiz-installer: Beremiz-$(BVERSION).exe
 
-Beremiz-$(TIMESTAMP).zip: Beremiz-$(TIMESTAMP)_build
+Beremiz-$(BVERSION).zip: Beremiz-$(BVERSION)_build
 	rm -f $@
 	cd installer; zip -r -q ../$@ .
 
-Beremiz-$(TIMESTAMP).exe: Beremiz-$(TIMESTAMP)_build $(src)/license.txt $(src)/install.nsi 
-	sed -e 's/\$$BVERSION/$(TIMESTAMP)/g' $(src)/license.txt > installer/license.txt
-	sed -e 's/\$$BVERSION/$(TIMESTAMP)/g' $(src)/install.nsi |\
+Beremiz-$(BVERSION).exe: Beremiz-$(BVERSION)_build $(src)/license.txt $(src)/install.nsi 
+	sed -e 's/\$$BVERSION/$(BVERSION)/g' $(src)/license.txt > installer/license.txt
+	sed -e 's/\$$BVERSION/$(BVERSION)/g' $(src)/install.nsi |\
 	makensis -
 
 

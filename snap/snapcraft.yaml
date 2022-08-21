@@ -1,14 +1,18 @@
 name: beremiz
-version: '1.3-beta2'
-summary: Beremiz
+adopt-info: beremiz
+summary: Beremiz Open Source PLC.
 description: |
   Beremiz is Free and Open Source PLC. It brings Free Software IDE (GPL) and Runtime (LGPL) for machine automation, conforming to IEC-61131.
-# TODO icon
+icon: snap/gui/beremiz.png
+contact: 
+  - https://beremiz.org
+  - snap@beremiz.fr
 
 
 grade: devel
-confinement: devmode
+confinement: strict
 base: core20
+architectures: [amd64, arm64]
 
 parts:
 
@@ -77,6 +81,9 @@ parts:
       - linux-libc-dev
       - libgcc-9-dev
       - libgcc-s1
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version `python2 $SNAPCRAFT_PART_SRC/version.py`
     override-build: |
       cp -a $SNAPCRAFT_PART_SRC $SNAPCRAFT_PART_INSTALL/beremiz
 
@@ -144,16 +151,25 @@ apps:
       SYSROOT: $SNAP
     command: usr/bin/python2 $SNAP/beremiz/Beremiz.py
     extensions: [gnome-3-38]
+    plugs:
+      - network
+      - network-bind
 
   beremiz:
     # Beremiz Command Line interface
     environment:
       SYSROOT: $SNAP
     command: usr/bin/python2 $SNAP/beremiz/Beremiz_cli.py
+    plugs:
+      - network
+      - network-bind
  
   runtime:
     # Standalone runtime
     environment:
       SYSROOT: $SNAP
     command: usr/bin/python2 $SNAP/beremiz/Beremiz_service.py
+    plugs:
+      - network
+      - network-bind
 
