@@ -1,12 +1,32 @@
 # Beremiz public distribution #
 
-This repository holds recipes and patches to build the Beremiz related 
-bundles, packages, installers and images available on 
-[Beremiz website](http://www.beremiz.org/).
+This repository holds recipes and patches to build the Beremiz 
+packages and installers for [Beremiz website](http://beremiz.org/).
 
-Patches have same license as projects beeing patched. For other files,
+Patches have same license as projects being patched. For other files,
 unless made explicit in file header, GPLv3 applies.
 
+## Use cases ##
+
+Beremiz development uses Mercurial, but git repositories that are kept in sync.
+
+Build from both Mercurial and Git repositories is supported.
+
+### GitHub CI ##
+
+Use code from https://github.com/beremiz repositories.
+
+Workflows described in .github/workflows are meant to run on a GitHub runner. Please refer to GitHub documentation to run workflows on your own fork.
+
+Dockerfile and part of Makefiles are used for windows installer build, but for Snap build, only snapcraft.yaml is used.
+
+### Manual build ###
+
+Use code from your local Mercurial repositories, cloned from https://hg.beremiz.org
+
+Uses Makefiles and Dockerfile to build windows installer and Makefile+snapcraft.yaml for Snap package.
+
+Hereafter is documented how to use Makefile and Docker in case of Manual Build
 
 ## Prerequisites ##
 
@@ -29,10 +49,10 @@ For example :
      /beremiz_public_dist
      /canfestival
      /matiec
+     /Modbus
 ```
 
-If any of Beremiz, Matiec or CanFestival repositories are missing, they will be
-cloned aside beremiz_public_dist from https://hg.beremiz.org .
+Repositories can be cloned from https://hg.beremiz.org .
 
 Intermediate and final results are all placed in a single 'build directory'
 during build process.
