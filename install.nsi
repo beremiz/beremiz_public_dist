@@ -51,11 +51,11 @@ Section "Shortcuts"
   SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\Beremiz"
   SetOutPath "$INSTDIR\mingw32\bin"
-  CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "${PYTHONW_EXE}" '"$INSTDIR\beremiz\plcopeneditor.py"' "$INSTDIR\beremiz\images\poe.ico"
+; CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "${PYTHONW_EXE}" '"$INSTDIR\beremiz\plcopeneditor.py"' "$INSTDIR\beremiz\images\poe.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Uninstall.lnk" "$INSTDIR\uninstall.exe"
-  SetShellVarContext current
-  CreateShortCut "$DESKTOP\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
+;  SetShellVarContext current
+;  CreateShortCut "$DESKTOP\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
 ; Profiling :
 ;  CreateShortCut "$DESKTOP\BeremizPro.lnk" "${PYTHONW_EXE}" '-m cProfile -o %USERPROFILE%/stats.pstat ${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
 SectionEnd
