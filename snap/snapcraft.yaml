@@ -1,8 +1,31 @@
 name: beremiz
 adopt-info: beremiz
+title: Beremiz
 summary: Beremiz Open Source PLC.
 description: |
-  Beremiz is Free and Open Source PLC. It brings Free Software IDE (GPL) and Runtime (LGPL) for machine automation, conforming to IEC-61131.
+  Beremiz is a framework for machine automation. It is meant to add PLC-like programing to embedded systems.
+
+  Beremiz is [Free Software](https://en.wikipedia.org/wiki/Free_software), and conforms to
+  [IEC_61131](https://en.wikipedia.org/wiki/IEC_61131-3) and [PLCopen](https://plcopen.org/technical-activities/xml-exchange) among other standards.
+
+  Beremiz supports all languages described in IEC_61131:
+  * Structured Text (ST)
+  * Instruction List (IL)
+  * Function Block Diagram (FBD)
+  * Sequencial Function Chart (SFC)
+  * Ladder Diagram (LD)
+
+  IDE also includes tools to create Human-Machine Interfaces (HMI), and to connect your PLC programs to existing supervisions, databases, or fieldbuses:
+  * Modbus
+  * OPC-UA
+  * CANopen
+  * SVG HMI
+  * Wx HMI
+  * Python
+  * ...
+
+  Runtime can be programmed remotely and allows variables tracing and forcing.
+
 icon: snap/gui/beremiz.png
 contact: 
   - https://beremiz.org
