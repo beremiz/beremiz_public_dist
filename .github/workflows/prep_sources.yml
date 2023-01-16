@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        beremiz_revisionid: 50b7329fa9bdfce4e72c1c4d2e7dfd08eb0e9a4c
+        beremiz_revisionid: f27ee64a77ab286e6bb3a13c593f60e107fa02f2
         matiec_revisionid: ba00e2b18e7335c03c011e1c6b2a5d99fc3571c3
         canfestival_revisionid: 12a05e422666c738d1312259703f80150c747cb5
         Modbus_revisionid: 75ba7cb15908411e71bf0e7b66651d182f347747
