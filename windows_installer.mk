@@ -40,7 +40,7 @@ $(msysdir)/.stamp: pacman/.stamp
 	touch $@
 
 $(mingw32dir)/.stamp: $(msysdir)/.stamp 
-	$(call pacman_install, mingw-w64-i686-gcc)
+	$(call pacman_install, mingw-w64-i686-gcc make)
 	touch $@
 
 # this takes just a fraction of msys2, but for now only this is needed
