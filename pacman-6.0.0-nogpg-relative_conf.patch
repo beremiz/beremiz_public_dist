@@ -1,7 +1,7 @@
 diff -ruN pacman-6.0.0.orig/lib/libalpm/util.c pacman-6.0.0/lib/libalpm/util.c
 --- pacman-6.0.0.orig/lib/libalpm/util.c	2021-05-20 03:38:45.948119900 +0000
 +++ pacman-6.0.0/lib/libalpm/util.c	2021-08-26 17:26:09.719703392 +0000
-@@ -652,6 +652,11 @@
+@@ -652,6 +652,12 @@
  		/* use fprintf instead of _alpm_log to send output through the parent */
  		if(chroot(handle->root) != 0) {
  			fprintf(stderr, _("could not change the root directory (%s)\n"), strerror(errno));
@@ -10,6 +10,7 @@ diff -ruN pacman-6.0.0.orig/lib/libalpm/util.c pacman-6.0.0/lib/libalpm/util.c
 +				fprintf(stderr, " %s", argv[i]);
 +			}
 +			fprintf(stderr, "\n");
++			return 0; //be happy
  			exit(1);
  		}
  		if(chdir("/") != 0) {
