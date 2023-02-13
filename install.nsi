@@ -40,7 +40,7 @@ Section "Install"
   WriteRegStr HKCU "Software\Beremiz" "" $INSTDIR
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Beremiz" "Contact" "edouard.tisserant@gmail.com"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Beremiz" "Contact" "contact@beremiz.fr"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Beremiz" "DisplayName" "Beremiz"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Beremiz" "Publisher" "Beremiz"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Beremiz" "URLInfoAbout" "http://www.beremiz.org"
