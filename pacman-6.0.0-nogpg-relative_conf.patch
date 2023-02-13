@@ -1,7 +1,3 @@
-Binary files pacman-6.0.0.orig/lib/libalpm/.dload.c.swp and pacman-6.0.0/lib/libalpm/.dload.c.swp differ
-Binary files pacman-6.0.0.orig/lib/libalpm/.error.c.swp and pacman-6.0.0/lib/libalpm/.error.c.swp differ
-Binary files pacman-6.0.0.orig/lib/libalpm/.hook.c.swp and pacman-6.0.0/lib/libalpm/.hook.c.swp differ
-Binary files pacman-6.0.0.orig/lib/libalpm/.trans.c.swp and pacman-6.0.0/lib/libalpm/.trans.c.swp differ
 diff -ruN pacman-6.0.0.orig/lib/libalpm/util.c pacman-6.0.0/lib/libalpm/util.c
 --- pacman-6.0.0.orig/lib/libalpm/util.c	2021-05-20 03:38:45.948119900 +0000
 +++ pacman-6.0.0/lib/libalpm/util.c	2021-08-26 17:26:09.719703392 +0000
@@ -17,8 +13,6 @@ diff -ruN pacman-6.0.0.orig/lib/libalpm/util.c pacman-6.0.0/lib/libalpm/util.c
  			exit(1);
  		}
  		if(chdir("/") != 0) {
-Binary files pacman-6.0.0.orig/lib/libalpm/.util.c.swp and pacman-6.0.0/lib/libalpm/.util.c.swp differ
-Binary files pacman-6.0.0.orig/.meson.build.swp and pacman-6.0.0/.meson.build.swp differ
 diff -ruN pacman-6.0.0.orig/src/pacman/conf.c pacman-6.0.0/src/pacman/conf.c
 --- pacman-6.0.0.orig/src/pacman/conf.c	2021-05-20 03:38:45.964786500 +0000
 +++ pacman-6.0.0/src/pacman/conf.c	2021-08-26 17:27:32.228666450 +0000
@@ -45,4 +39,3 @@ diff -ruN pacman-6.0.0.orig/src/pacman/conf.c pacman-6.0.0/src/pacman/conf.c
  				if(ret) {
  					goto cleanup;
  				}
-Binary files pacman-6.0.0.orig/src/pacman/.conf.c.swp and pacman-6.0.0/src/pacman/.conf.c.swp differ

@@ -54,16 +54,12 @@ Section "Shortcuts"
 ; CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "${PYTHONW_EXE}" '"$INSTDIR\beremiz\plcopeneditor.py"' "$INSTDIR\beremiz\images\poe.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Uninstall.lnk" "$INSTDIR\uninstall.exe"
-;  SetShellVarContext current
-;  CreateShortCut "$DESKTOP\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
-; Profiling :
-;  CreateShortCut "$DESKTOP\BeremizPro.lnk" "${PYTHONW_EXE}" '-m cProfile -o %USERPROFILE%/stats.pstat ${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
 SectionEnd
 
 Section "Uninstall"
   SetShellVarContext all
   Delete "$INSTDIR\Uninstall.exe"
-  Delete "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk"
+;  Delete "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk"
   Delete "$SMPROGRAMS\Beremiz\Beremiz.lnk"
   RMDir /R "$SMPROGRAMS\Beremiz"
   RMDir /R "$INSTDIR"
