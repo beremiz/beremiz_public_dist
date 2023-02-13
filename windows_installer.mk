@@ -9,6 +9,7 @@ CXX=$(CROSS_COMPILE)-g++
 
 installer:
 	mkdir -p installer
+	cp $(src)/winpaths.py installer
 
 
 CURDIR:=$(shell pwd)
@@ -18,8 +19,7 @@ MSYS_ROOT=$(CURDIR)/$(msysdir)
 
 XVFBRUN ?= xvfb-run -a
 
-mingw32dir=$(msysdir)/mingw32
-mingw32finaldir=installer/mingw32
+msysfinaldir=installer/msys2
 
 pacman/.stamp:
 	rm -rf pacman pacman-6.0.0
@@ -39,16 +39,13 @@ $(msysdir)/.stamp: pacman/.stamp
 	rm -rf $(msysdir)
 	$(call get_src_http,http://repo.msys2.org/distrib/i686,msys2-base-i686-20210705.tar.xz)\
 	tar -xJf $$dld
+	$(call pacman_install, mingw-w64-i686-gcc)
+	$(call pacman_install, make)
 	touch $@
 
-$(mingw32dir)/.stamp: $(msysdir)/.stamp 
-	$(call pacman_install, mingw-w64-i686-gcc make)
-	touch $@
-
-# this takes just a fraction of msys2, but for now only this is needed
-$(mingw32finaldir): $(mingw32dir)/.stamp | installer
-	rm -rf $(mingw32finaldir)
-	cp -a $(mingw32dir) $(mingw32finaldir)
+$(msysfinaldir): $(msysdir)/.stamp | installer
+	rm -rf $(msysfinaldir)
+	cp -a $(msysdir) $(msysfinaldir)
 
 msiexec = WINEPREFIX=$(tmp) $(XVFBRUN) msiexec
 wine = WINEPREFIX=$(tmp) $(XVFBRUN) wine
@@ -135,7 +132,7 @@ $(ide_revisions): revisions.txt
 	cp $< $@ 
 
 Beremiz-build: Beremiz-$(BVERSION)_build
-Beremiz-$(BVERSION)_build: $(mingw32finaldir) $(pydir)/.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
+Beremiz-$(BVERSION)_build: $(msysfinaldir) $(pydir)/.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
 	touch $@
 
 Beremiz-archive: Beremiz-$(BVERSION).zip

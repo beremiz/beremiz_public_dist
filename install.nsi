@@ -28,7 +28,7 @@ Name "Beremiz $BVERSION"
 OutFile "Beremiz-$BVERSION.exe"
 InstallDir "$PROGRAMFILES\Beremiz"
 !define PYTHONW_EXE "$INSTDIR\python\pythonw.exe"
-!define BEREMIZ_EXE '"$INSTDIR\beremiz\Beremiz.py" -u "http://www.beremiz.org/updateinfo/$BVERSION/"'
+!define BEREMIZ_EXE '"$INSTDIR\beremiz\Beremiz.py" -e "$INSTDIR\winpaths.py"'
 
 Section "Beremiz" 
   SetOutPath $INSTDIR
@@ -50,7 +50,7 @@ SectionEnd
 Section "Shortcuts"
   SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\Beremiz"
-  SetOutPath "$INSTDIR\mingw32\bin"
+  SetOutPath "%HOMEDRIVE%%HOMEPATH%"
 ; CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "${PYTHONW_EXE}" '"$INSTDIR\beremiz\plcopeneditor.py"' "$INSTDIR\beremiz\images\poe.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "${PYTHONW_EXE}" '${BEREMIZ_EXE}' "$INSTDIR\beremiz\images\brz.ico"
   CreateShortCut "$SMPROGRAMS\Beremiz\Uninstall.lnk" "$INSTDIR\uninstall.exe"
