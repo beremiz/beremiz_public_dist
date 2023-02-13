@@ -1,4 +1,6 @@
-BVERSION=$(shell python2 sources/beremiz/version.py)
+
+VERSIONPY=sources/beremiz/version.py
+BVERSION?=$(if $(file <$(VERSIONPY)), $(shell python2 $(VERSIONPY)), $(shell date '+%x_%R' | tr '/: ' '---'))
 
 CROSS_COMPILE=i686-w64-mingw32
 CROSS_COMPILE_LIBS_DIR=$(shell dirname $(shell $(CROSS_COMPILE)-gcc -print-libgcc-file-name))

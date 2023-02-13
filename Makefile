@@ -16,8 +16,6 @@ HGROOT ?= $(abspath $(src)/..)
 GITROOT := $(HGROOT)
 CPUS := `cat /proc/cpuinfo | grep -e 'processor\W*:\W*[[:digit:]]*' | nl -n ln | tail -n1 | cut -f1`
 
-BVERSION=$(shell python2 sources/beremiz/version.py)
-
 distfiles = $(src)/distfiles
 sfmirror = downloads
 tmp := $(shell rm -rf $${TMPDIR:-/tmp}/beremiz_dist_build_tmp.* ; mktemp -d -t beremiz_dist_build_tmp.XXXXXXXXXX)
