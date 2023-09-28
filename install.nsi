@@ -4,6 +4,9 @@ SetCompressor /SOLID /FINAL lzma
 SetDatablockOptimize off
 
 !include MUI2.nsh
+;!include LogicLib.nsh
+!include x64.nsh
+
 
 ; MUI Settings
 !define MUI_ICON "installer\beremiz\images\brz.ico"
@@ -25,17 +28,22 @@ SetDatablockOptimize off
 !insertmacro MUI_LANGUAGE "English"
 
 Name "Beremiz $BVERSION"
-OutFile "Beremiz-$BVERSION.exe"
-InstallDir "$PROGRAMFILES\Beremiz"
-!define PYTHONW_EXE "$INSTDIR\python\pythonw.exe"
+OutFile "Beremiz-nsis-installer.exe"
+InstallDir "$PROGRAMFILES64\Beremiz"
+!define PYTHONW_EXE "$INSTDIR\$MSYS_DIR\$MSYS_ENV_DIR\bin\pythonw.exe"
 !define BEREMIZ_EXE '"$INSTDIR\beremiz\Beremiz.py" -e "$INSTDIR\winpaths.py"'
 
 Section "Beremiz" 
   SetOutPath $INSTDIR
-  File /r /x debian /x *.pyc "installer/*"
+  ${If} ${IsNativeAMD64}
+    File /r /x debian /x *.pyc "installer/*"
+  ${Else}
+    Abort "Unsupported CPU architecture!"
+  ${EndIf}
 SectionEnd
 
 Section "Install"
+  SetRegView 64
   ;Store installation folder
   WriteRegStr HKCU "Software\Beremiz" "" $INSTDIR
   ;Create uninstaller
@@ -57,6 +65,7 @@ Section "Shortcuts"
 SectionEnd
 
 Section "Uninstall"
+  SetRegView 64
   SetShellVarContext all
   Delete "$INSTDIR\Uninstall.exe"
 ;  Delete "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk"

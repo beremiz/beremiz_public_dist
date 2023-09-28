@@ -15,7 +15,6 @@ locale-gen en_US.UTF-8
 TZ="America/Paris" \
 DEBIAN_FRONTEND="noninteractive" \
 apt-get install -y --no-install-recommends \
-     autoconf                   \
      automake                   \
      bc                         \
      bison                      \
@@ -24,23 +23,19 @@ apt-get install -y --no-install-recommends \
      cpio                       \
      cmake                      \
      fakeroot                   \
-     file                       \
      flex                       \
      gettext                    \
      gawk                       \
      git                        \
      gperf                      \
-     gcc-multilib               \
      g++-multilib               \
      help2man                   \
      less                       \
      libarchive-dev             \
      libcurl4-openssl-dev       \
      libssl-dev                 \
-     libtool                    \
      libtool-bin                \
      lzma                       \
-     make                       \
      mercurial                  \
      meson                      \
      mingw-w64                  \
@@ -48,9 +43,7 @@ apt-get install -y --no-install-recommends \
      nsis                       \
      rsync                      \
      pkg-config                 \
-     python                     \
-     python-dev                 \
-     python3-distutils          \
+     python3-pip                \
      subversion                 \
      swig                       \
      texinfo                    \
@@ -59,16 +52,6 @@ apt-get install -y --no-install-recommends \
      wget                       \
      xvfb                       \
      zip
-
-
-## for winehq-staging
-#     gnupg                      \
-#     libgpgme-dev               \
-#     software-properties-common \
-# wget -nc https://dl.winehq.org/wine-builds/winehq.key
-# apt-key add winehq.key
-# add-apt-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ focal main'
-# apt-get update
 
 echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 echo ttf-mscorefonts-installer msttcorefonts/present-mscorefonts-eula note | debconf-set-selections

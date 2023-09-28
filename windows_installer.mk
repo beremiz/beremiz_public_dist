@@ -1,12 +1,4 @@
 
-VERSIONPY=sources/beremiz/version.py
-BVERSION?=$(if $(file <$(VERSIONPY)), $(shell python2 $(VERSIONPY)), $(shell date '+%x_%R' | tr '/: ' '---'))
-
-CROSS_COMPILE=i686-w64-mingw32
-CROSS_COMPILE_LIBS_DIR=$(shell dirname $(shell $(CROSS_COMPILE)-gcc -print-libgcc-file-name))
-CC=$(CROSS_COMPILE)-gcc
-CXX=$(CROSS_COMPILE)-g++
-
 installer:
 	mkdir -p installer
 	cp $(src)/winpaths.py installer
@@ -14,106 +6,134 @@ installer:
 
 CURDIR:=$(shell pwd)
 PACMANPFX=$(CURDIR)/pacman
-msysdir=msys32
-MSYS_ROOT=$(CURDIR)/$(msysdir)
+MSYS_DIR=msys64
+MSYS_ENV_DIR=ucrt64
+MSYS_ENV=mingw-w64-ucrt-x86_64
+MSYS_ROOT=$(CURDIR)/$(MSYS_DIR)
 
 XVFBRUN ?= xvfb-run -a
 
-msysfinaldir=installer/msys2
+msysfinaldir=installer/$(MSYS_DIR)
 
-pacman/.stamp:
+pacman-6.0.0/src.stamp:
 	rm -rf pacman pacman-6.0.0
 	$(call get_src_http,https://sources.archlinux.org/other/pacman,pacman-6.0.0.tar.xz)\
 	tar -xJf $$dld
+	touch $@
+
+pacman-6.0.0/patched.stamp: pacman-6.0.0/src.stamp
 	cd pacman-6.0.0 ;\
-	patch -p1 < $(src)/pacman-6.0.0-nogpg-relative_conf.patch ;\
+	patch -p1 < $(src)/pacman-6.0.0-nogpg-relative_conf.patch ;
+	touch $@
+
+pacman/.stamp: pacman-6.0.0/patched.stamp
+	cd pacman-6.0.0 ;\
 	meson -Droot-dir=$(MSYS_ROOT) -Dsysconfdir=$(MSYS_ROOT)/etc -Dlocalstatedir=$(MSYS_ROOT)/var build ;\
 	DESTDIR=$(PACMANPFX) ninja -C build install
 	touch $@
 
-define pacman_install
-LD_LIBRARY_PATH=$(PACMANPFX)/usr/lib/x86_64-linux-gnu/ fakeroot pacman/usr/bin/pacman -S $(1) --arch i686 --noconfirm --cachedir $(distfiles)
+define pacman_call
+LD_LIBRARY_PATH=$(PACMANPFX)/usr/lib/x86_64-linux-gnu/ fakeroot pacman/usr/bin/pacman $(1)
 endef
 
-$(msysdir)/.stamp: pacman/.stamp 
-	rm -rf $(msysdir)
-	$(call get_src_http,http://repo.msys2.org/distrib/i686,msys2-base-i686-20210705.tar.xz)\
+pacman_update=$(call pacman_call, -Sy --noconfirm --cachedir $(distfiles));
+pacman_install_ming=$(call pacman_call, -S $(1) --arch x86_64 --noconfirm --cachedir $(distfiles));
+pacman_install_msys=$(call pacman_call, -S $(1) --noconfirm --cachedir $(distfiles));
+
+# First part are python packages requested by our app and available in msys
+# Second part are dependencies of packages to be later installed with pip
+# Third part : neede for cross-install operation
+#    -> all those packages are installed with pacman, ignoring version given in requirements.txt
+define MSYS_PY_PACKAGES
+	brotli
+	click
+	fonttools
+	lxml
+	matplotlib
+	msgpack
+	pycountry
+	u-msgpack
+	zeroconf
+	twisted
+	
+	cryptography
+	aiosqlite
+	pytz
+	sortedcontainers
+
+	pip
+endef
+
+define MSYS_PACKAGES_NAMES
+	gcc
+	make
+	wxPython
+	$(foreach package, $(MSYS_PY_PACKAGES), python-$(package))
+endef
+
+MSYS_PACKAGES=$(foreach package, $(MSYS_PACKAGES_NAMES), $(MSYS_ENV)-$(package))
+
+$(MSYS_DIR)/.stamp: pacman/.stamp 
+	rm -rf $(MSYS_DIR)
+
+	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20230718.tar.xz)\
 	tar -xJf $$dld
-	$(call pacman_install, mingw-w64-i686-gcc)
-	$(call pacman_install, make)
+
+	# Do NOT update package lists to make build reproducible
+	# All packages version are as given in base image.
+	## $(pacman_update)	
+
+	$(call pacman_install_ming,$(MSYS_PACKAGES))
 	touch $@
 
-$(msysfinaldir): $(msysdir)/.stamp | installer
-	rm -rf $(msysfinaldir)
-	cp -a $(msysdir) $(msysfinaldir)
+# filter-out all python packages already installed by pacman
+filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
+	grep sources/beremiz/requirements.txt -i -v \
+		`$(call pacman_call, -Qqs 'python-.*') | sed -e 's/$(MSYS_ENV)-python-/ -e /'` \
+		-e wxPython \
+		$(foreach package, $(MSYS_PY_PACKAGES), -e $(package)) > filtered_requirements.txt
 
-msiexec = WINEPREFIX=$(tmp) $(XVFBRUN) msiexec
+# download remaining pip packages separtately with local python
+# workaround msys2's git crashing when launched from pip on wine
+# bug: https://bugs.winehq.org/show_bug.cgi?id=40528
+pip_downloads/.stamp: filtered_requirements.txt
+	rm -rf pip_downloads
+	# python3 -m pip download --no-deps -r filtered_requirements.txt -d pip_downloads
+	python3 -m pip wheel --no-deps -r filtered_requirements.txt -w pip_downloads
+	touch $@
+
+# install downloaded .whl files with wine
+# TODO: find a less convoluited way instead of wine to unpack wheels
+#       but still populating __pycache__ for this particular python version
+winpythonbin = $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin/python.exe
 wine = WINEPREFIX=$(tmp) $(XVFBRUN) wine
-pydir = installer/python
-pysite = $(pydir)/Lib/site-packages
-
-python: $(pydir)/.stamp
-$(pydir)/.stamp: | installer
-	rm -rf $(pydir)
-	mkdir -p $(pydir)
-	
-	# Python
-	$(call get_src_http,http://www.python.org/ftp/python/2.7.13,python-2.7.13.msi)\
-	$(msiexec) /qn /i $$dld TARGETDIR=.\\$(pydir)
-	
-	# # wxPython fails if VC9.0 redistribuable is not fully here.
-	# $(call get_src_http,http://download.microsoft.com/download/1/1/1/1116b75a-9ec3-481a-a3c8-1777b5381140,vcredist_x86.exe)\
-	# cp $$dld $(tmp)
-	# $(wine) $(tmp)/vcredist_x86.exe /qn /i
-	# cp -fu $(tmp)/drive_c/windows/winsxs/x86_microsoft.vc90*/* $(pydir)
-	
-	$(wine) $(pydir)/python.exe -m pip install --only-binary :all: --cache-dir $(distfiles) \
-        wxPython            \
-        future              \
-        matplotlib          \
-        pywin32             \
-        twisted             \
-        pyOpenSSL           \
-        Nevow               \
-        autobahn            \
-        msgpack_python      \
-        u-msgpack-python    \
-        zeroconf-py2compat  \
-        lxml                \
-        sslpsk              \
-        pycountry           \
-        fonttools           \
-        Brotli
-	
-	$(wine) $(pydir)/python.exe -m pip install --cache-dir $(distfiles) \
-        Pyro                \
-        gnosis              
-	
-	# # FIXME : this uses 'some' binaries of openssl that forces us to stick to python 2.7.13
-	# # FIXME : (from here : https://www.npcglib.org/~stathis/blog/precompiled-openssl/)
-	# # FIXME : build it, and use openssl binaries from https://github.com/python/cpython-bin-deps/tree/openssl-bin-1.0.2k
-	# WxGlade
-	$(call get_src_http,https://github.com/wxGlade/wxGlade/archive,v0.8.3.zip)\
-	unzip -d $(tmp) $$dld
-	mv $(tmp)/wxGlade-0.8.3 $(pysite)/wxglade
-	
+pip.stamp: pip_downloads/.stamp
+	cd pip_downloads; $(wine) $(winpythonbin) -m pip install --no-deps *
 	touch $@
+
+$(msysfinaldir)/.stamp: pip.stamp | installer
+	rm -rf $(msysfinaldir)
+	cp -a $(MSYS_DIR) $(msysfinaldir)
+	touch $@
+
+CROSS_COMPILE=x86_64-w64-mingw32
+CROSS_COMPILE_LIBS_DIR=$(shell dirname $(shell $(CROSS_COMPILE)-gcc -print-libgcc-file-name))
 
 matiecdir = installer/matiec
 matiec: $(matiecdir)/.stamp
 $(matiecdir)/.stamp: sources/matiec_src | installer
 	cp -a sources/matiec $(tmp);\
 	cd $(tmp)/matiec;\
-	autoreconf;\
-	automake --add-missing;\
-	./configure --host=$(CROSS_COMPILE);\
-	make -j$(CPUS);
+	autoreconf ;\
+	automake --add-missing ;\
+	LDFLAGS=-lstdc++ ./configure --host=$(CROSS_COMPILE);\
+	$(MAKE) -j$(CPUS);
 	rm -rf $(matiecdir)
 	mkdir -p $(matiecdir)
 	mv $(tmp)/matiec/*.exe $(matiecdir)
 	
 	# install necessary shared libraries from local cross-compiler
-	cp $(CROSS_COMPILE_LIBS_DIR)/libgcc_s_sjlj-1.dll $(matiecdir)
+	cp $(CROSS_COMPILE_LIBS_DIR)/libgcc_s_seh-1.dll $(matiecdir)
 	cp $(CROSS_COMPILE_LIBS_DIR)/libstdc++-6.dll $(matiecdir)
 	
 	mv $(tmp)/matiec/lib $(matiecdir)
@@ -125,28 +145,37 @@ beremiz: $(beremizdir)/.stamp
 $(beremizdir)/.stamp:  sources/beremiz_src | installer
 	rm -rf $(beremizdir);\
 	cp -a sources/beremiz $(beremizdir);\
+	# populate __pycache__'s .pyc files
+	cd $(beremizdir) ;\
+		find . -name "*.py" | grep -v \
+			-e \./etherlab \
+			-e .*/web_settings.py \
+			-e \./tests \
+			-e \./exemples \
+			> tocompile.lst ;\
+		$(wine) $(winpythonbin) -m compileall -i tocompile.lst
+	rm $(beremizdir)/tocompile.lst
 	touch $@
 
 ide_revisions = installer/revisions.txt
 $(ide_revisions): revisions.txt
 	cp $< $@ 
 
-Beremiz-build: Beremiz-$(BVERSION)_build
-Beremiz-$(BVERSION)_build: $(msysfinaldir) $(pydir)/.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
+Beremiz-windows-build: $(msysfinaldir)/.stamp pip.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
 	touch $@
 
-Beremiz-archive: Beremiz-$(BVERSION).zip
-
-Beremiz-installer: Beremiz-$(BVERSION).exe
-
-Beremiz-$(BVERSION).zip: Beremiz-$(BVERSION)_build
+Beremiz-portable.zip: Beremiz-windows-build
 	rm -f $@
 	cd installer; zip -r -q ../$@ .
 
-Beremiz-$(BVERSION).exe: Beremiz-$(BVERSION)_build $(src)/license.txt $(src)/install.nsi 
-	sed -e 's/\$$BVERSION/$(BVERSION)/g' $(src)/license.txt > installer/license.txt
-	sed -e 's/\$$BVERSION/$(BVERSION)/g' $(src)/install.nsi |\
-	makensis -
+VERSIONPY=sources/beremiz/version.py
 
+Beremiz-nsis-installer.exe: Beremiz-windows-build $(src)/license.txt $(src)/install.nsi 
+	export BVERSION=`python3 $(VERSIONPY)` ;\
+	sed -e "s/\$$BVERSION/$$BVERSION/g" $(src)/license.txt > installer/license.txt ;\
+	sed -e "s/\$$BVERSION/$$BVERSION/g" $(src)/install.nsi |\
+	sed -e "s#\$$MSYS_DIR#$(MSYS_DIR)#g" |\
+	sed -e "s#\$$MSYS_ENV_DIR#$(MSYS_ENV_DIR)#g" > install.nsi
+	makensis install.nsi
 
 

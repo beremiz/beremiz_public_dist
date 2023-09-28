@@ -1,4 +1,4 @@
-beremiz tip
-canfestival tip
-Modbus tip
-matiec tip
+beremiz local
+canfestival local
+Modbus local
+matiec local

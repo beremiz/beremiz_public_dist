@@ -82,8 +82,8 @@ Source and Build Volumes :
  
  Role             | Docker Volume     | Host path in example | Rationale
 ------------------|-------------------|----------------------|------------------------------------------------
- source directory | /home/devel/src   | ~/src                | Always relative to CWD : "../"
- build directory  | /home/devel/build | ~/build              | First argument to rebuild_docker.sh or ~/build
+ source directory | /home/runner/src   | ~/src                | Always relative to CWD : "../"
+ build directory  | /home/runner/build | ~/build              | First argument to rebuild_docker.sh or ~/build
 
 'build directory' can be specified as absolute path argument of rebuild_docker.sh.
 If not specified it defaults to ~/build

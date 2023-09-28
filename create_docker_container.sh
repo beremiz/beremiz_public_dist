@@ -12,7 +12,7 @@ BUILDDIR=${1:-~/build}
 mkdir -p $BUILDDIR
 echo "BUILD direcory : $BUILDDIR"
 
-UNAME=devel
+UNAME=runner
 UHOME=/home/$UNAME
 
 echo "Creating docker container"
