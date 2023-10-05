@@ -39,6 +39,15 @@ jobs:
         ./build_docker_image.sh
         docker image save --output="/tmp/latest.tar" beremiz_public_builder
 
+
+    - if: ${{ steps.cache-docker.outputs.cache-hit == false }}
+      name: Save docker image in cache
+      id: cache-docker-save
+      uses: actions/cache/save@v3
+      with:
+        path: /tmp/latest.tar
+        key: ${{ steps.cache-docker.outputs.cache-primary-key }}
+
     - if: ${{ steps.cache-docker.outputs.cache-hit != false }}
       name: Re-use docker image
       run: |
