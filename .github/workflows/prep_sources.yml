@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        beremiz_revisionid: e5e87b5d522e4cdc0d82113e5831c1487f2cc042
-        matiec_revisionid: ba00e2b18e7335c03c011e1c6b2a5d99fc3571c3
+        beremiz_revisionid: 0189295a9c03fb29797ee174915057061e737603
+        matiec_revisionid: e5be6a1f036d21cd7b5ee75ef352783a7cfcc1a7
         canfestival_revisionid: 12a05e422666c738d1312259703f80150c747cb5
-        Modbus_revisionid: 75ba7cb15908411e71bf0e7b66651d182f347747
-        open62541_revisionid: ff73268829359639531ff02905c889f73a77b408
+        Modbus_revisionid: 4d7d67a8e911d744165709c20a254b5cb924ec71
+        open62541_revisionid: b8ac9e77f703e6ba5c012b886a8821037503daa6
 
 
     steps:
