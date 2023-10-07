@@ -84,9 +84,9 @@ all_sources: own_sources sources/open62541_src
 
 sources/open62541_src: | sources
 	rm -rf sources/open62541
-	$(call get_src_http,https://github.com/open62541/open62541/archive/refs/tags,v1.3.2.tar.gz)\
+	$(call get_src_http,https://github.com/open62541/open62541/archive/refs/tags,v1.3.7.tar.gz)\
 	tar -xzf $$dld
-	mv open62541-1.3.2 sources/open62541
+	mv open62541-1.3.7 sources/open62541
 	
 
 define show_revision_details

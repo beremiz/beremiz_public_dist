@@ -2,6 +2,8 @@
 
 main_target: Snap
 
+DIST_FROM_SOURCE_PROJECTS=canfestival Modbus open62541
+
 tar_opts=--absolute-names --exclude=.hg --exclude=.git --exclude=.*.pyc --exclude=.*.swp
 
 Snap: snap_built

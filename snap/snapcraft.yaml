@@ -34,69 +34,23 @@ contact:
 
 grade: devel
 confinement: strict
-base: core20
+base: core22
 architectures: [amd64, arm64]
 
 parts:
 
-  python-deps:
-    # This part provides all python2 dependencies, including interpreter
-    # More particularily, it builds latest PIP supporting python2 from git
-    # and uses it to collect and buid other Beremiz dependencies.
-    #
-    # rational:
-    #  - python plugin doesn't support python2 anymore on core20+
-    #  - attempts to get python2+pip+virtualenv in a core20 based snap failed
-
-    plugin: nil
-    source: https://github.com/pypa/pip/archive/refs/tags/20.3.4.tar.gz
-    build-packages:
-      - libssl-dev
-      - libgtk-3-dev
-      - libgl1-mesa-dev
-      - libglu1-mesa-dev
-      - python2-dev
-
-    stage-packages:
-      - python2
-      - python-setuptools
-      - python-lxml
-
-    override-build: |
-      # For some reasons site-packages needs to be created and 
-      # added to PYTHONPATH during PIP (own) build.
-      # Apparently not anymore when snap is executed.
-      mkdir $SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages
-      PYTHONPATH=$SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages \
-        $SNAPCRAFT_PART_INSTALL/usr/bin/python2 $SNAPCRAFT_PART_SRC/setup.py \
-            install --prefix $SNAPCRAFT_PART_INSTALL/usr
-      PYTHONPATH=$SNAPCRAFT_PART_INSTALL/usr/lib/python2.7/site-packages \
-        $SNAPCRAFT_PART_INSTALL/usr/bin/pip install \
-          future              \
-          matplotlib          \
-          msgpack_python      \
-          u-msgpack-python    \
-          zeroconf2           \
-          enum34              \
-          pyro                \
-          sslpsk              \
-          posix_spawn         \
-          twisted             \
-          nevow               \
-          autobahn            \
-          click               \
-          opcua               \
-          pycountry           \
-          fonttools           \
-          Brotli              \
-          wxPython==4.1.1
-
   beremiz:
-    # Beremiz python source + GCC toolchain
+    # Beremiz python source and dependencies, inc. native GCC
     # source tree is expected to be just aside snap directory
-    plugin: nil
+    plugin: python
     source: beremiz
     source-type: local
+    python-requirements:
+      - requirements.txt
+    # native GCC toolchain
+    # note: GCC toolchain cannot be move to separate part
+    # otherwise there is a file conflict about lib64 in prime step
+    # caused apparently by libc6 (needed to have consistent sysroot)
     stage-packages:
       - gcc
       - libc6
@@ -106,8 +60,9 @@ parts:
       - libgcc-s1
     override-pull: |
       snapcraftctl pull
-      snapcraftctl set-version `python2 $SNAPCRAFT_PART_SRC/version.py`
+      snapcraftctl set-version `python3 $SNAPCRAFT_PART_SRC/version.py`
     override-build: |
+      snapcraftctl build
       cp -a $SNAPCRAFT_PART_SRC $SNAPCRAFT_PART_INSTALL/beremiz
 
   matiec:
@@ -172,8 +127,8 @@ apps:
     # Launcher for the IDE
     environment:
       SYSROOT: $SNAP
-    command: usr/bin/python2 $SNAP/beremiz/Beremiz.py
-    extensions: [gnome-3-38]
+    command: bin/python3 $SNAP/beremiz/Beremiz.py
+    extensions: [gnome]
     plugs:
       - network
       - network-bind
@@ -182,7 +137,7 @@ apps:
     # Beremiz Command Line interface
     environment:
       SYSROOT: $SNAP
-    command: usr/bin/python2 $SNAP/beremiz/Beremiz_cli.py
+    command: bin/python3 $SNAP/beremiz/Beremiz_cli.py
     plugs:
       - network
       - network-bind
@@ -191,7 +146,7 @@ apps:
     # Standalone runtime
     environment:
       SYSROOT: $SNAP
-    command: usr/bin/python2 $SNAP/beremiz/Beremiz_service.py
+    command: bin/python3 $SNAP/beremiz/Beremiz_service.py
     plugs:
       - network
       - network-bind

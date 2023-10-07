@@ -47,9 +47,10 @@ For example :
 ~/src
      /beremiz
      /beremiz_public_dist
-     /canfestival
      /matiec
-     /Modbus
+     /canfestival [optional]
+     /Modbus      [optional]
+     /open62541   [optional]
 ```
 
 Repositories can be cloned from https://hg.beremiz.org .
@@ -67,16 +68,6 @@ Synopsis:
 
     ./rebuild_docker.sh [build directory]
 
-Example:
-
-```
-#!sh
-mkdir ~/src ~/build
-cd ~/src
-hg clone https://hg.beremiz.org/beremiz_public_dist
-cd beremiz_public_dist
-./rebuild_docker.sh
-```
 
 Source and Build Volumes :
  
@@ -126,16 +117,15 @@ snapcraft.yaml does not rely on HG or GIT repos, but refers to local sources, th
 Reasons for this are :
  - no parameters or conditional variables exist to tell snapcraft.yaml where to get the source from
  - building from local source should be always possible
- - revisions.txt must be updated in any case so that it is always possible to know what version wqas used to build resulting package
+ - revisions.txt must be updated in any case so that it is always possible to know what version was used to build resulting package
  - when Snap is built from GitHub actions, Makefile isn't used at all, and GitHub action workflow organize sources and revisions.txt on its own.
 
 In the end, instead of just calling `snapcraft` to get a snap package, it is more complicated:
 
 ```
-#!sh
-mkdir ~/src ~/build
-cd ~/src
-hg clone https://hg.beremiz.org/beremiz_public_dist
+# assuming source repositories are cloned in ~/src 
+# and build happens in ~/build
+
 cd ~/build
 make -f ~/src/beremiz_public_dist/Makefile DIST=snap
 
@@ -144,6 +134,6 @@ Resulting snap package is sources/beremiz_${version}_${platform}.snap.
 It can be installed this way:
 
 ```
-sudo snap install sources/beremiz_1.3-beta2_amd64.snap --dangerous --devmode
+sudo snap install sources/beremiz_1.4-beta2_amd64.snap --dangerous --devmode
 ```
 

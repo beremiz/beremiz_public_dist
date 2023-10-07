@@ -1,4 +1,5 @@
 beremiz local
 canfestival local
 Modbus local
+open62541 local
 matiec local
