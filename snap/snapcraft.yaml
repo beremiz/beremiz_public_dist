@@ -60,10 +60,10 @@ parts:
       - libgcc-s1
     override-pull: |
       snapcraftctl pull
-      snapcraftctl set-version `python3 $SNAPCRAFT_PART_SRC/version.py`
+      snapcraftctl set-version `python3 $CRAFT_PART_SRC/version.py`
     override-build: |
       snapcraftctl build
-      cp -a $SNAPCRAFT_PART_SRC $SNAPCRAFT_PART_INSTALL/beremiz
+      cp -a $CRAFT_PART_SRC $CRAFT_PART_INSTALL/beremiz
 
   matiec:
     # Matiec ST, SFC and IL compiler.
@@ -78,7 +78,7 @@ parts:
       - bison
     override-build: |
       autoreconf -i && ./configure && make
-      cp -a $SNAPCRAFT_PART_BUILD $SNAPCRAFT_PART_INSTALL/matiec
+      cp -a $CRAFT_PART_BUILD $CRAFT_PART_INSTALL/matiec
 
   modbus:
     plugin: nil
@@ -89,7 +89,7 @@ parts:
       - automake
     override-build: |
       make
-      cp -a $SNAPCRAFT_PART_BUILD $SNAPCRAFT_PART_INSTALL/Modbus
+      cp -a $CRAFT_PART_BUILD $CRAFT_PART_INSTALL/Modbus
 
   open62541:
     plugin: nil
@@ -100,7 +100,7 @@ parts:
       - cmake
     override-build: |
       mkdir build && cd build && cmake .. && make
-      cp -a $SNAPCRAFT_PART_BUILD $SNAPCRAFT_PART_INSTALL/open62541
+      cp -a $CRAFT_PART_BUILD $CRAFT_PART_INSTALL/open62541
       
   inkscape:
     # CLI only, used in SVGHMI build
@@ -120,7 +120,7 @@ parts:
     source: .
     source-type: local
     override-build: |
-      cp $SNAPCRAFT_PART_SRC/revisions.txt $SNAPCRAFT_PART_INSTALL
+      cp $CRAFT_PART_SRC/revisions.txt $CRAFT_PART_INSTALL
 
 apps:
   ide:
