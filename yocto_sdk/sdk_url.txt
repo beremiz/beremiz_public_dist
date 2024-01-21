@@ -1,4 +1,6 @@
-Due to big size, I have provided here google drive download link of the tookchain file.
+This toolchain is for Linux Host
+
+Due to big size, I have provided here google drive download link of the toolchain file.
 
 After downloading this, User has to install this file and give a path for installation.
 
