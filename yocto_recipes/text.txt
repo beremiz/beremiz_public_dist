@@ -1,0 +1,2 @@
+This file is to prepare test a workflow with beremiz_public_dist
+actual feature will be added once the workflow is set
