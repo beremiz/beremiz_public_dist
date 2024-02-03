@@ -32,4 +32,4 @@ python3 /usr/bin/Beremiz/Beremiz_service.py -p 61194 -i 10.91.20.222 -x 0 -a 1 /
 
 Your runtime should start and now you can use beremiz IDE to write sample program and upload to raspberry pi4
 
-To do for future - Autostart runtime on power cycle, add preemp-rt patch to image and many more. 
+To do for future - Autostart runtime on power cycle, add preemp-rt patch to web browser in kiosk mode for GUI support. 
