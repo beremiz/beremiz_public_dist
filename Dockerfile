@@ -15,8 +15,6 @@ ARG GID=1000
 RUN groupadd -g $GID $UNAME
 RUN useradd -m -u $UID -g $GID -s /bin/bash $UNAME
 
-USER root
-
 COPY ./provision_jammy64.sh .
 
 RUN ./provision_jammy64.sh
