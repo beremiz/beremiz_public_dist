@@ -99,7 +99,7 @@ filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 pip_downloads/.stamp: filtered_requirements.txt
 	rm -rf pip_downloads
 	mkdir pip_downloads
-	python3 -m --platform mingw_x86_64_ucrt --no-deps -r filtered_requirements.txt -d pip_downloads
+	python3 -m pip download --platform mingw_x86_64_ucrt --no-deps -r filtered_requirements.txt -d pip_downloads
 	touch $@
 
 # install downloaded .whl files with wine
