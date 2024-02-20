@@ -1,0 +1,35 @@
+# meta-beremiz
+Yocto layer for beremiz_runtime : Below is the procedure to get started. 
+
+Please leave a message if you would like to add new feature or request a new feature. We would be happy to know.
+
+This is Yocto layer for building an Yocto based image for raspberry pi which contains beremiz runtime. When this layer is included in yocto build then the resulting image is having all dependencies and runtime files necessary for beremiz runtime.
+
+Steps :
+
+Prerequisites : This is tested on Ubuntu 20.0 and Yocto branch of honister on Host. Target was raspberry-pi4 64 bit image
+
+In first step User has to have a Yocto build setup which can build successful image for e.g core-image-base, and it should boot properly on raspberry pi4. This procedure on how to setup Yocto is out of scope of this article.
+
+User has to clone this repository i.e meta-beremiz on host machine
+
+Then user can add this layer to his yocto build using command bitbake-layers add-layer ../sources/meta-<custom_layer> Use the path where the repo is cloned.
+
+User has to clone beremiz repository from git clone https://github.com/beremiz/beremiz 
+
+From the cloned repository, This Layer will automatically pickup all necessary runtime files
+
+Open the local.conf file: at yocto/build/conf/local.conf and add the line IMAGE_INSTALL_append += " meta-beremiz"
+
+build the image using command bitbake core-image-base
+
+Once build is sucessful, Burn the SD card and boot this image.
+
+Login to raspberrypi4 using root user and no password
+
+To start runtime set the IP address of your choice and give below command
+python3 /usr/bin/Beremiz/Beremiz_service.py -p 61194 -i 10.91.20.222 -x 0 -a 1 /usr/bin/beremiz_runtime_workdir
+
+Your runtime should start and now you can use beremiz IDE to write sample program and upload to raspberry pi4
+
+To do for future - Autostart runtime on power cycle, add preemp-rt patch to web browser in kiosk mode for GUI support. 
