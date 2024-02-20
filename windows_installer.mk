@@ -98,17 +98,17 @@ filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 # bug: https://bugs.winehq.org/show_bug.cgi?id=40528
 pip_downloads/.stamp: filtered_requirements.txt
 	rm -rf pip_downloads
-	# python3 -m pip download --no-deps -r filtered_requirements.txt -d pip_downloads
-	python3 -m pip wheel --no-deps -r filtered_requirements.txt -w pip_downloads
+	mkdir pip_downloads
+	python3 -m pip download --platform mingw_x86_64_ucrt --no-deps -r filtered_requirements.txt -d pip_downloads
 	touch $@
 
 # install downloaded .whl files with wine
-# TODO: find a less convoluited way instead of wine to unpack wheels
+# TODO: find a less convoluited way instead of wine to build/install packages
 #       but still populating __pycache__ for this particular python version
 winpythonbin = $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin/python.exe
 wine = WINEPREFIX=$(tmp) $(XVFBRUN) wine
 pip.stamp: pip_downloads/.stamp
-	cd pip_downloads; $(wine) $(winpythonbin) -m pip install --no-deps *
+	cd pip_downloads; SETUPTOOLS_USE_DISTUTILS=stdlib $(wine) $(winpythonbin) -m pip install --no-deps *
 	touch $@
 
 $(msysfinaldir)/.stamp: pip.stamp | installer
