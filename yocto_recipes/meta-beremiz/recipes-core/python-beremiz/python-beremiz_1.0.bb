@@ -1,41 +1,17 @@
-DESCRIPTION = "Simple Python setuptools hello world application"
-SECTION = "examples"
+DESCRIPTION = "Beremiz Runtime python based"
+SECTION = "Runtime for PLC"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-SRC_URI = "file://setup.py \
-           file://beremiz/Beremiz_service.py \
-           file://beremiz/version.py \
-           file://beremiz/images/brz.png \
-           file://beremiz/images/icoplay24.png \
-           file://beremiz/images/icostop24.png \
-           file://beremiz/runtime/__init__.py \
-           file://beremiz/runtime/loglevels.py \
-           file://beremiz/runtime/monotonic_time.py \
-           file://beremiz/runtime/NevowServer.py \
-           file://beremiz/runtime/PLCObject.py \
-           file://beremiz/runtime/PlcStatus.py \
-           file://beremiz/runtime/PyroServer.py \
-           file://beremiz/runtime/ServicePublisher.py \
-           file://beremiz/runtime/spawn_subprocess.py \
-           file://beremiz/runtime/Stunnel.py \
-           file://beremiz/runtime/typemapping.py \
-           file://beremiz/runtime/WampClient.py \
-           file://beremiz/runtime/webinterface.css \
-           file://beremiz/runtime/webinterface.js \
-           file://beremiz/runtime/Worker.py \
-           file://beremiz/runtime/xenomai.py \
-           file://beremiz/util/__init__.py \
-           file://beremiz/util/paths.py \
-"
+SRC_URI = "git://github.com/Nabeel3007/python-beremiz.git;protocol=https;branch=master"
 
-S = "${WORKDIR}"
+SRCREV = "${AUTOREV}"
 
-inherit setuptools3
+S = "${WORKDIR}/git"
 
 do_install:append () {
+    install -d ${D}${bindir}/beremiz_runtime_workdir
     install -d ${D}${bindir}/Beremiz
-    install -m 0755 setup.py ${D}${bindir}/Beremiz
     install -m 0755 beremiz/Beremiz_service.py ${D}${bindir}/Beremiz
     install -m 0755 beremiz/version.py ${D}${bindir}/Beremiz
     install -d ${D}${bindir}/Beremiz/images

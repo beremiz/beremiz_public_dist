@@ -12,6 +12,7 @@ RDEPENDS_${PN} = "\
      python3-autobahn \
      python3-ifaddr \
      python3-msgpack \
+     python3-nevow-py3 \
      python3-pyro5 \
      python3-zeroconf \
      python3-zope.interface \
