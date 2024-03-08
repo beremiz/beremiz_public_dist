@@ -58,6 +58,7 @@ parts:
       - linux-libc-dev
       - libgcc-9-dev
       - libgcc-s1
+      - libssl-dev
     override-pull: |
       snapcraftctl pull
       snapcraftctl set-version `python3 $CRAFT_PART_SRC/version.py`
