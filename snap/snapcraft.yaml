@@ -133,6 +133,7 @@ apps:
     plugs:
       - network
       - network-bind
+      - wayland
 
   beremiz:
     # Beremiz Command Line interface
