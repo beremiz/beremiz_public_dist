@@ -8,6 +8,7 @@ on:
 jobs:
   sources:
     uses: ./.github/workflows/prep_sources.yml
+    secrets: inherit
 
   build:
     needs: sources
@@ -16,7 +17,7 @@ jobs:
     steps:
 
     - name: Download source artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: source_package
 
@@ -35,7 +36,7 @@ jobs:
         path: build/sources
 
     - name: Upload built artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: snap
         path: ${{ steps.snapcraft.outputs.snap }}
