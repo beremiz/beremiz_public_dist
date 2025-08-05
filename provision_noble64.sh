@@ -7,6 +7,7 @@ apt-get update
 apt-get install -y --no-install-recommends \
      build-essential            \
      `# building pacman`        \
+     wget                       \
      meson                      \
      cmake                      \
      pkg-config                 \
