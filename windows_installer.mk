@@ -43,7 +43,6 @@ pacman_install_msys=$(call pacman_call, -S $(1) --noconfirm --cachedir $(distfil
 # Second part are dependencies of packages to be later installed with pip
 # Third part : neede for cross-install operation
 #    -> all those packages are installed with pacman, ignoring version given in requirements.txt
-# 4th part: certs for download
 define MSYS_PY_PACKAGES
 	brotli
 	click
@@ -62,8 +61,6 @@ define MSYS_PY_PACKAGES
 	sortedcontainers
 
 	pip
-
-	pip-system-certs
 endef
 
 define MSYS_PACKAGES_NAMES
@@ -96,10 +93,14 @@ filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 		-e wxPython \
 		$(foreach package, $(MSYS_PY_PACKAGES), -e $(package)) > filtered_requirements.txt
 
+# windows or msys2 specific packages
+extended_requirements.txt: filtered_requirements.txt
+	echo pip-system-certs >> $@
+
 # download remaining pip packages separtately with local python
 # workaround msys2's git crashing when launched from pip on wine
 # bug: https://bugs.winehq.org/show_bug.cgi?id=40528
-pip_downloads/.stamp: filtered_requirements.txt
+pip_downloads/.stamp: extended_requirements.txt
 	rm -rf pip_downloads
 	mkdir pip_downloads
 	python3 -m pip download --platform mingw_x86_64_ucrt --no-deps -r filtered_requirements.txt -d pip_downloads
