@@ -67,6 +67,7 @@ define MSYS_PACKAGES_NAMES
 	gcc
 	make
 	wxPython
+	7zip
 	$(foreach package, $(MSYS_PY_PACKAGES), python-$(package))
 endef
 
@@ -75,7 +76,7 @@ MSYS_PACKAGES=$(foreach package, $(MSYS_PACKAGES_NAMES), $(MSYS_ENV)-$(package))
 $(MSYS_DIR)/.stamp: pacman/.stamp 
 	rm -rf $(MSYS_DIR)
 
-	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20230718.tar.xz)\
+	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20250622.tar.xz)\
 	tar -xJf $$dld
 
 	# Do NOT update package lists to make build reproducible
@@ -105,15 +106,26 @@ pip_downloads/.stamp: filtered_requirements.txt
 # TODO: find a less convoluited way instead of wine to build/install packages
 #       but still populating __pycache__ for this particular python version
 winpythonbin = $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin/python.exe
-wine = WINEPREFIX=$(tmp) $(XVFBRUN) wine
+wine = WINEPREFIX=$(tmp) wine
 pip.stamp: pip_downloads/.stamp
-	cd pip_downloads; SETUPTOOLS_USE_DISTUTILS=stdlib $(wine) $(winpythonbin) -m pip install --no-deps *
+	cd pip_downloads;\
+	MSYSTEM=$(MSYSTEM) \
+	WINEPATH="`winepath -w $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin`" \
+	$(wine) $(winpythonbin) -m pip install --no-deps --break-system-packages *
 	touch $@
 
+# final patching step once MSYS2 directory is in place
 $(msysfinaldir)/.stamp: pip.stamp | installer
 	rm -rf $(msysfinaldir)
 	cp -a $(MSYS_DIR) $(msysfinaldir)
+
+	# Ensure that app's home directory is set to BeremizHome, in AppData
 	sed -i '/^db_home:/c\db_home: /%H/BeremizHome' $(msysfinaldir)/etc/nsswitch.conf
+
+	# Neutralize wxPython's svg module, broken in MSYS2 
+	# and that matplotlib tries to import, causing a crash.
+	sed -i 's/^/# /' $(msysfinaldir)/$(MSYS_ENV_DIR)/lib/python3.*/site-packages/wx/svg/__init__.py
+	
 	touch $@
 
 CROSS_COMPILE=x86_64-w64-mingw32
@@ -144,7 +156,7 @@ beremizdir = installer/beremiz
 beremiz: $(beremizdir)/.stamp
 $(beremizdir)/.stamp:  sources/beremiz_src | installer
 	rm -rf $(beremizdir);\
-	cp -a sources/beremiz $(beremizdir);\
+	cp -a sources/beremiz $(beremizdir);
 	# populate __pycache__'s .pyc files
 	cd $(beremizdir) ;\
 		find . -name "*.py" | grep -v \

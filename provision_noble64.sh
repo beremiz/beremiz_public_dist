@@ -6,6 +6,8 @@ apt-get update
 
 apt-get install -y --no-install-recommends \
      build-essential            \
+     `# getting wine repo`      \
+     gpg                        \
      `# building pacman`        \
      wget                       \
      meson                      \
@@ -30,7 +32,14 @@ apt-get install -y --no-install-recommends \
      nsis                       \
      zip
 
-# run win python3
+# Need at least wine 9.13 to run python3.12 in wine
+# on noble64 only 9.0 is available, so we add the official wine repository
+# https://forum.winehq.org/viewtopic.php?t=39119
+mkdir -pm755 /etc/apt/keyrings
+wget -O - https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key -
+wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/noble/winehq-noble.sources
+
 dpkg --add-architecture i386
-apt-get install -y --install-recommends \
-     wine-stable
+apt update
+apt install -y --install-recommends \
+     winehq-stable
