@@ -43,6 +43,7 @@ pacman_install_msys=$(call pacman_call, -S $(1) --noconfirm --cachedir $(distfil
 # Second part are dependencies of packages to be later installed with pip
 # Third part : neede for cross-install operation
 #    -> all those packages are installed with pacman, ignoring version given in requirements.txt
+# 4th part: certs for download
 define MSYS_PY_PACKAGES
 	brotli
 	click
@@ -61,6 +62,8 @@ define MSYS_PY_PACKAGES
 	sortedcontainers
 
 	pip
+
+	pip-system-certs
 endef
 
 define MSYS_PACKAGES_NAMES
