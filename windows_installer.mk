@@ -97,9 +97,10 @@ filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 extended_requirements.txt: filtered_requirements.txt
 	echo pip-system-certs >> $@
 
-# download remaining pip packages separtately with local python
+# download remaining pip packages separately with local python
 # workaround msys2's git crashing when launched from pip on wine
 # bug: https://bugs.winehq.org/show_bug.cgi?id=40528
+# TODO: get rid of this workaround, bug is fixed in wine 9.11
 pip_downloads/.stamp: extended_requirements.txt
 	rm -rf pip_downloads
 	mkdir pip_downloads
@@ -107,7 +108,7 @@ pip_downloads/.stamp: extended_requirements.txt
 	touch $@
 
 # install downloaded .whl files with wine
-# TODO: find a less convoluited way instead of wine to build/install packages
+# TODO: find a less convoluted way instead of wine to build/install packages
 #       but still populating __pycache__ for this particular python version
 winpythonbin = $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin/python.exe
 wine = WINEPREFIX=$(tmp) wine
