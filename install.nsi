@@ -1,5 +1,5 @@
 
-SetCompressor /SOLID /FINAL lzma
+SetCompressor /FINAL lzma
 ;SetCompress off
 SetDatablockOptimize off
 
