@@ -16,7 +16,7 @@ for path in paths:
 
 # re-compose PATH
 os.environ["PATH"] = os.pathsep.join(new_PATH_1st + [
-    os.path.join(instdir, "$MSYS_DIR", "bin"),
+    os.path.join(instdir, "$MSYS_DIR", "$MSYS_ENV_DIR", "bin"),
     os.path.join(instdir, "$MSYS_DIR", "usr", "bin"),
 ] + new_PATH_2nd)
 # Note: $MSYSTEM/bin is already added to PATH when calling pythonw.exe

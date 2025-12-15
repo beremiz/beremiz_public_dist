@@ -54,6 +54,7 @@ define MSYS_PY_PACKAGES
 	u-msgpack
 	zeroconf
 	twisted
+	pyopenssl
 	
 	cryptography
 	aiosqlite
@@ -70,6 +71,12 @@ define MSYS_PACKAGES_NAMES
 	7zip
 	$(foreach package, $(MSYS_PY_PACKAGES), python-$(package))
 endef
+
+define PIP_EXCTRA_PACKAGES
+	pip-system-certs
+	service_identity
+endef
+
 
 MSYS_PACKAGES=$(foreach package, $(MSYS_PACKAGES_NAMES), $(MSYS_ENV)-$(package))
 
@@ -95,7 +102,8 @@ filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 
 # windows or msys2 specific packages
 extended_requirements.txt: filtered_requirements.txt
-	echo pip-system-certs >> $@
+	cp $< $@
+	($(foreach package, $(PIP_EXCTRA_PACKAGES), echo $(package);)) >> $@
 
 # download remaining pip packages separately with local python
 # workaround msys2's git crashing when launched from pip on wine

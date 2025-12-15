@@ -6,7 +6,7 @@ set "script_dir=%~dp0"
 
 rem Set the path to the executable relative to the script directory
 set "python_exe=%script_dir%\$MSYS_DIR\$MSYS_ENV_DIR\bin\pythonw.exe"
-set "plcopeneditor_py=%script_dir%\Beremiz\PLCOpenEditor.py"
+set "plcopeneditor_py=%script_dir%\beremiz\PLCOpenEditor.py"
 
 set MSYSTEM=$MSYSTEM
 
