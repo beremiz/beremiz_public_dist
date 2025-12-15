@@ -55,6 +55,7 @@ define MSYS_PY_PACKAGES
 	zeroconf
 	twisted
 	pyopenssl
+	pyasn1
 	
 	cryptography
 	aiosqlite
