@@ -43,7 +43,7 @@ pacman_install_msys=$(call pacman_call, -S $(1) --noconfirm --cachedir $(distfil
 # Second part are dependencies of packages to be later installed with pip
 # Third part : neede for cross-install operation
 #    -> all those packages are installed with pacman, ignoring version given in requirements.txt
-define MSYS_PY_PACKAGES
+define MINGW_PY_PACKAGES
 	brotli
 	click
 	fonttools
@@ -65,12 +65,12 @@ define MSYS_PY_PACKAGES
 	pip
 endef
 
-define MSYS_PACKAGES_NAMES
+define MINGW_PACKAGES_NAMES
 	gcc
 	make
 	wxPython
 	7zip
-	$(foreach package, $(MSYS_PY_PACKAGES), python-$(package))
+	$(foreach package, $(MINGW_PY_PACKAGES), python-$(package))
 endef
 
 define PIP_EXCTRA_PACKAGES
@@ -79,7 +79,11 @@ define PIP_EXCTRA_PACKAGES
 endef
 
 
-MSYS_PACKAGES=$(foreach package, $(MSYS_PACKAGES_NAMES), $(MSYS_ENV)-$(package))
+MINGW_PACKAGES=$(foreach package, $(MINGW_PACKAGES_NAMES), $(MSYS_ENV)-$(package))
+
+define MSYS_PACKAGES
+	git
+endef
 
 $(MSYS_DIR)/.stamp: pacman/.stamp 
 	rm -rf $(MSYS_DIR)
@@ -91,7 +95,9 @@ $(MSYS_DIR)/.stamp: pacman/.stamp
 	# All packages version are as given in base image.
 	## $(pacman_update)	
 
-	$(call pacman_install_ming,$(MSYS_PACKAGES))
+	$(call pacman_install_ming,$(MINGW_PACKAGES))
+
+	$(call pacman_install_msys,$(MSYS_PACKAGES))
 	touch $@
 
 # filter-out all python packages already installed by pacman
