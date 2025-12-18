@@ -81,9 +81,9 @@ endef
 
 MINGW_PACKAGES=$(foreach package, $(MINGW_PACKAGES_NAMES), $(MSYS_ENV)-$(package))
 
-define MSYS_PACKAGES
-	git
-endef
+# define MSYS_PACKAGES
+# 	git
+# endef
 
 $(MSYS_DIR)/.stamp: pacman/.stamp 
 	rm -rf $(MSYS_DIR)
@@ -95,7 +95,7 @@ $(MSYS_DIR)/.stamp: pacman/.stamp
 	# All packages version are as given in base image.
 	## $(pacman_update)	
 
-	$(call pacman_install_ming,$(MINGW_PACKAGES))
+# 	$(call pacman_install_ming,$(MINGW_PACKAGES))
 
 	$(call pacman_install_msys,$(MSYS_PACKAGES))
 	touch $@
