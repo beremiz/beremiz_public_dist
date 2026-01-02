@@ -95,9 +95,9 @@ $(MSYS_DIR)/.stamp: pacman/.stamp
 	# All packages version are as given in base image.
 	## $(pacman_update)	
 
-# 	$(call pacman_install_ming,$(MINGW_PACKAGES))
+	$(call pacman_install_ming,$(MINGW_PACKAGES))
 
-	$(call pacman_install_msys,$(MSYS_PACKAGES))
+#	$(call pacman_install_msys,$(MSYS_PACKAGES))
 	touch $@
 
 # filter-out all python packages already installed by pacman
