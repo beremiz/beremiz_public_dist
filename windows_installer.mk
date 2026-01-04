@@ -139,8 +139,8 @@ $(msysfinaldir)/.stamp: pip.stamp | installer
 	rm -rf $(msysfinaldir)
 	cp -a $(MSYS_DIR) $(msysfinaldir)
 
-	# Ensure that app's home directory is set to BeremizHome, in AppData
-	sed -i '/^db_home:/c\db_home: /%H/BeremizHome' $(msysfinaldir)/etc/nsswitch.conf
+	# Ensure that app's home directory is set to in Beremiz's AppData
+	sed -i '/^db_home:/c\db_home: /%H/AppData/Roaming/Beremiz' $(msysfinaldir)/etc/nsswitch.conf
 
 	# Neutralize wxPython's svg module, broken in MSYS2 
 	# and that matplotlib tries to import, causing a crash.
