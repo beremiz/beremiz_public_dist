@@ -1,2 +1,3 @@
 distfiles/*
 !distfiles/*.md5
+.vscode/*
