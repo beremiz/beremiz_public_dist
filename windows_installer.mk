@@ -116,7 +116,11 @@ extended_requirements.txt: filtered_requirements.txt
 # workaround msys2's git crashing when launched from pip on wine
 # bug: https://bugs.winehq.org/show_bug.cgi?id=40528
 # TODO: get rid of this workaround, bug is fixed in wine 9.11
-pip_downloads/.stamp: extended_requirements.txt
+extended_requirements.md5: extended_requirements.txt
+	md5sum $< > $@.tmp
+	cmp -s $@ $@.tmp && rm $@.tmp || mv $@.tmp $@
+
+pip_downloads/.stamp: extended_requirements.md5
 	rm -rf pip_downloads
 	mkdir pip_downloads
 	python3 -m pip download --platform mingw_x86_64_ucrt --no-deps -r extended_requirements.txt -d pip_downloads
