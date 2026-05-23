@@ -45,6 +45,7 @@ pacman_install_msys=$(call pacman_call, -S $(1) --noconfirm --cachedir $(distfil
 #    -> all those packages are installed with pacman, ignoring version given in requirements.txt
 define MINGW_PY_PACKAGES
 	brotli
+	cffi
 	click
 	fonttools
 	lxml
@@ -88,7 +89,7 @@ MINGW_PACKAGES=$(foreach package, $(MINGW_PACKAGES_NAMES), $(MSYS_ENV)-$(package
 $(MSYS_DIR)/.stamp: pacman/.stamp 
 	rm -rf $(MSYS_DIR)
 
-	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20250622.tar.xz)\
+	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20260322.tar.xz)\
 	tar -xJf $$dld
 
 	# Do NOT update package lists to make build reproducible
@@ -102,7 +103,7 @@ $(MSYS_DIR)/.stamp: pacman/.stamp
 
 # filter-out all python packages already installed by pacman
 filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
-	grep sources/beremiz/requirements.txt -i -v \
+	grep sources/beremiz/requirements_pinned.txt -i -v \
 		`$(call pacman_call, -Qqs 'python-.*') | sed -e 's/$(MSYS_ENV)-python-/ -e /'` \
 		-e wxPython \
 		$(foreach package, $(MSYS_PY_PACKAGES), -e $(package)) > filtered_requirements.txt
