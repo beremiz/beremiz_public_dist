@@ -33,7 +33,7 @@ $(1)_revision?=$(lastword $(shell grep $(1) $(src)/revisions.txt))
 endef
 $(foreach project,$(FROM_SOURCE_PROJECTS),$(eval $(call get_revision,$(project))))
 
-tar_opts=--absolute-names --exclude=.hg --exclude=.git --exclude=.*.pyc --exclude=.*.swp --exclude=__pycache__
+tar_opts=--absolute-names --exclude=.* --exclude=.*.pyc --exclude=.*.swp --exclude=__pycache__
 
 define get_revisionid
 $(1)_revisionid ?=\

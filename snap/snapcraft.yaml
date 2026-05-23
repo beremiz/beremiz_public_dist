@@ -34,8 +34,10 @@ contact:
 
 grade: stable
 confinement: strict
-base: core22
-architectures: [amd64, arm64]
+base: core24
+platforms:
+  amd64:
+  arm64:
 
 parts:
 
@@ -45,8 +47,35 @@ parts:
     plugin: python
     source: beremiz
     source-type: local
+    # wxPython is provided at runtime by the staged python3-wxgtk4.0 deb, not
+    # by pip:
+    #   - requirements_snap.txt is requirements_pinned.txt with the wxpython
+    #     line filtered out (generated in override-build). The python plugin
+    #     installs requirements with `pip install -U`; with -U pip would
+    #     rebuild wxpython from the PyPI sdist instead of using the deb, so we
+    #     keep it out of pip's input entirely. (Same approach as the wxPython
+    #     filter in windows_installer.mk.)
+    #   - The deb installs wx into usr/lib/python3/dist-packages, staged into
+    #     the payload. With the gnome extension the venv's base interpreter is
+    #     the gnome platform's python (base_prefix=/usr at runtime), so neither
+    #     --system-site-packages nor the staged payload is searched for it. The
+    #     .pth written to the venv site-packages in override-build adds
+    #     $SNAP/usr/lib/python3/dist-packages to sys.path so `import wx` works;
+    #     .pth dirs are searched after the venv's own packages, so pip-installed
+    #     deps keep priority.
+    # PARTS_PYTHON_VENV_ARGS is consumed by the craft-parts python plugin:
+    # https://github.com/canonical/craft-parts/blob/main/craft_parts/plugins/python_plugin.py
     python-requirements:
-      - requirements.txt
+      - requirements_snap.txt
+    build-environment:
+      - PARTS_PYTHON_VENV_ARGS: --system-site-packages
+      # libssl-dev installs opensslconf.h under the arch-triplet include dir
+      # (usr/include/$triplet/openssl/), which gcc doesn't search by default
+      # when pip builds C extensions like sslpsk against the staged headers.
+      - CPPFLAGS: -I$CRAFT_PART_INSTALL/usr/include/$CRAFT_ARCH_TRIPLET_BUILD_FOR
+    build-packages:
+      - git
+      - libssl-dev
     # native GCC toolchain
     # note: GCC toolchain cannot be move to separate part
     # otherwise there is a file conflict about lib64 in prime step
@@ -56,15 +85,48 @@ parts:
       - libc6
       - libc6-dev
       - linux-libc-dev
-      - libgcc-9-dev
       - libgcc-s1
-      - libssl-dev
+      - python3-wxgtk4.0
     override-pull: |
-      snapcraftctl pull
-      snapcraftctl set-version `python3 $CRAFT_PART_SRC/version.py`
+      craftctl default
+      craftctl set version="$(python3 $CRAFT_PART_SRC/version.py)"
     override-build: |
-      snapcraftctl build
-      cp -a $CRAFT_PART_SRC $CRAFT_PART_INSTALL/beremiz
+      # Produce requirements_snap.txt = requirements_pinned.txt without
+      # wxpython (provided by the staged deb; see note above). Done before
+      # craftctl default so the plugin's pip install picks it up.
+      grep -v -i wxpython requirements_pinned.txt > requirements_snap.txt
+      craftctl default
+      # Put the staged python3-wxgtk4.0 (usr/lib/python3/dist-packages) on the
+      # venv's path; see note above. Relative path so it stays valid when
+      # $CRAFT_PART_INSTALL is remapped to $SNAP at install time.
+      for sp in "$CRAFT_PART_INSTALL"/lib/python3.*/site-packages; do
+        echo '../../../usr/lib/python3/dist-packages' > "$sp/snap-dist-packages.pth"
+      done
+      # The staged gcc compiles the PLC runtime with --sysroot=$SNAP. libc's
+      # linker script and gcc's specs reference libc.so.6 and the ELF
+      # interpreter by absolute /lib paths; under the sysroot ld looks for them
+      # at $SNAP/lib/... The payload has no merged-/usr symlinks (snapcraft
+      # doesn't stage base-files' /lib->usr/lib, and the venv owns a real /lib),
+      # so add compatibility links so ld resolves them through the sysroot.
+      # ($SNAP/lib64 is already a symlink to lib, so /lib64/<interp> resolves
+      # via the /lib/<interp> link below.)
+      triplet="$CRAFT_ARCH_TRIPLET_BUILD_FOR"
+      ln -sfn "../usr/lib/$triplet" "$CRAFT_PART_INSTALL/lib/$triplet"
+      ldso="$(cd "$CRAFT_PART_INSTALL/usr/lib/$triplet" && echo ld-*.so.*)"
+      ln -sfn "$triplet/$ldso" "$CRAFT_PART_INSTALL/lib/$ldso"
+      cp -a "$CRAFT_PART_SRC" "$CRAFT_PART_INSTALL/beremiz"
+      # Pre-compile beremiz sources to populate __pycache__ so the IDE starts
+      # faster on first launch. Mirrors the compileall pass in
+      # windows_installer.mk; same exclusion list (etherlab/, web_settings.py,
+      # tests/, exemples/ are either generated, runtime-templated, or unused
+      # at IDE runtime).
+      cd "$CRAFT_PART_INSTALL/beremiz" && \
+        find . -name '*.py' \
+          | grep -v -e '\./etherlab' -e '.*/web_settings\.py' \
+                    -e '\./tests'    -e '\./exemples' \
+          > tocompile.lst && \
+        python3 -m compileall -q -i tocompile.lst && \
+        rm tocompile.lst
 
   matiec:
     # Matiec ST, SFC and IL compiler.
@@ -109,12 +171,6 @@ parts:
     plugin: nil
     stage-packages:
       - inkscape
-      - libgtk-3-0 
-      # libgtk3 needs to be explicitely given
-      # otherwise wxGtk doesn't start, with this error :
-      # libgtk-3.so.0: undefined symbol: pango_font_family_get_face
-      # ... why ?
-
   revisiontxt:
     # Makefile generated "revisions.txt"
     plugin: nil
@@ -125,15 +181,16 @@ parts:
 
 apps:
   ide:
-    # Launcher for the IDE
+    # Launcher for the IDE.
+    extensions: [gnome]
     environment:
       SYSROOT: $SNAP
     command: bin/python3 $SNAP/beremiz/Beremiz.py
-    extensions: [gnome]
     plugs:
       - network
       - network-bind
-      - wayland
+      - home
+      - removable-media
 
   beremiz:
     # Beremiz Command Line interface
