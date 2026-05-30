@@ -1,6 +1,6 @@
 # Win32 only distribution
 
-main_target: Beremiz-nsis-installer.exe Beremiz-portable.zip
+main_target: beremiz-windows-installer beremiz-windows-portable
 
 include $(src)/windows_installer.mk
 

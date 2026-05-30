@@ -28,16 +28,12 @@ SetDatablockOptimize off
 !insertmacro MUI_LANGUAGE "English"
 
 Name "Beremiz $BVERSION"
-OutFile "Beremiz-nsis-installer.exe"
+OutFile "beremiz-windows-installer_$BVERSION_amd64.exe"
 InstallDir "$PROGRAMFILES64\Beremiz"
 
 Section "Beremiz" 
   SetOutPath $INSTDIR
-  ${If} ${IsNativeAMD64}
-    File /r /x debian /x *.pyc "installer/*"
-  ${Else}
-    Abort "Unsupported CPU architecture!"
-  ${EndIf}
+  File /r "installer/*"
 SectionEnd
 
 Section "Install"

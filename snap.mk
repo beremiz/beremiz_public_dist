@@ -1,18 +1,23 @@
 # Snap distribution
 
-main_target: Snap
+main_target: snap_amd64 snap_arm64
 
 DIST_FROM_SOURCE_PROJECTS=canfestival Modbus
-# open62541 is systematically downloaded in main Makefile
 
-tar_opts=--absolute-names --exclude=.hg --exclude=.git --exclude=.*.pyc --exclude=.*.swp
-
-Snap: snap_built
-snap_sources: all_sources revisions.txt
+snap_sources: all_sources $(src)/snap/snapcraft.yaml | revisions.txt  # revisions.txt is regenated even if no changes
+	rm -rf sources/snap
 	tar -C $(src) $(tar_opts) -c snap | tar -C sources -x
 	cp revisions.txt sources
 	touch $@
 
-snap_built: snap_sources
-	cd sources;  snapcraft pack --debug 
+# Assume building on intel/amd architecture
+snap_amd64: snap_sources
+	cd sources; snapcraft clean ; snapcraft pack
+	mv sources/beremiz_`python3 $(VERSIONPY)`_amd64.snap .
+	touch $@
+
+# Assume snapcraft is allowed to remote-build
+snap_arm64: snap_sources
+	cd sources; git init . ; snapcraft remote-build --launchpad-accept-public-upload --build-for arm64
+	mv sources/beremiz_`python3 $(VERSIONPY)`_arm64.snap .
 	touch $@

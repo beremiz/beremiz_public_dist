@@ -198,7 +198,17 @@ ide_revisions = installer/revisions.txt
 $(ide_revisions): revisions.txt
 	cp $< $@ 
 
-Beremiz-windows-build: $(src)/license.txt $(src)/beremiz_ide.cmd $(src)/plcopen_editor.cmd $(src)/winpaths.py $(msysfinaldir)/.stamp pip.stamp $(matiecdir)/.stamp $(beremizdir)/.stamp ide_targets_from_dist $(ide_revisions)
+beremiz-windows-build: $(src)/license.txt \
+                       $(src)/beremiz_ide.cmd \
+					   $(src)/plcopen_editor.cmd \
+					   $(src)/winpaths.py \
+					   $(msysfinaldir)/.stamp \
+					   pip.stamp \
+					   $(matiecdir)/.stamp \
+					   $(beremizdir)/.stamp \
+					   ide_targets_from_dist \
+					   | $(ide_revisions) # revisions.txt is regenated even if no changes
+	
 	export BVERSION=`python3 $(VERSIONPY)` ;\
 	sed -e "s/\$$BVERSION/$$BVERSION/g" $(src)/license.txt > installer/license.txt
 	
@@ -219,15 +229,17 @@ Beremiz-windows-build: $(src)/license.txt $(src)/beremiz_ide.cmd $(src)/plcopen_
 
 	touch $@
 
-Beremiz-portable.zip: Beremiz-windows-build
-	rm -f $@
-	cd installer; zip -r -q ../$@ .
-
-VERSIONPY=sources/beremiz/version.py
-
-Beremiz-nsis-installer.exe: Beremiz-windows-build $(src)/install.nsi 
+beremiz-windows-portable: beremiz-windows-build
 	export BVERSION=`python3 $(VERSIONPY)` ;\
+	rm -f beremiz-windows-portable_$${BVERSION}_amd64.zip ;\
+	cd installer; zip -r -q ../beremiz-windows-portable_$${BVERSION}_amd64.zip .
+	touch $@
+
+beremiz-windows-installer: beremiz-windows-build $(src)/install.nsi 
+	export BVERSION=`python3 $(VERSIONPY)` ;\
+	rm -f beremiz-windows-installer_$${BVERSION}_amd64.zip ;\
 	sed -e "s/\$$BVERSION/$$BVERSION/g" $(src)/install.nsi > install.nsi
 	makensis install.nsi
+	touch $@
 
 

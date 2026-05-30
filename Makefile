@@ -22,6 +22,8 @@ define get_src_http
 	dld=$(distfiles)/`echo $(2) | tr ' ()' '___'`;( ( [ -f $$dld ] || wget $(1)/$(2) -O $$dld ) && ( [ ! -f $$dld.md5 ] && (cd $(distfiles);md5sum `basename $$dld`) > $$dld.md5 || (cd $(distfiles);md5sum -c `basename $$dld.md5`) ) ) &&
 endef
 
+VERSIONPY=sources/beremiz/version.py
+
 ifneq ("$(DIST)","")
 include $(src)/$(DIST).mk
 endif
@@ -37,7 +39,9 @@ tar_opts=--absolute-names --exclude=.* --exclude=.*.pyc --exclude=.*.swp --exclu
 
 define get_revisionid
 $(1)_revisionid ?=\
-		$(shell tar $(tar_opts) -P -c $(WORKSPACE)/$(1) | sha1sum | cut -d ' ' -f 1)
+		$(shell cd $(WORKSPACE)/$(1) && \
+			find . -type f -not -path '*/.*' -not -path '*/__pycache__/*' -print0 \
+			| LC_ALL=C sort -z | xargs -0 sha1sum | sha1sum | cut -d ' ' -f 1)
 endef
 $(foreach project,$(FROM_SOURCE_PROJECTS),$(eval $(call get_revisionid,$(project))))
 
@@ -59,15 +63,16 @@ $(foreach project,$(FROM_SOURCE_PROJECTS),$(eval $(call make_src_rule,$(project)
 own_sources: $(foreach project,$(FROM_SOURCE_PROJECTS), sources/$(project)_src)
 	touch $@
 
-all_sources: own_sources sources/open62541_src
-	touch $@
-
 sources/open62541_src: | sources
 	rm -rf sources/open62541
 	$(call get_src_http,https://github.com/open62541/open62541/archive/refs/tags,v1.3.7.tar.gz)\
 	tar -xzf $$dld
 	mv open62541-1.3.7 sources/open62541
-	
+	touch $@
+
+all_sources: own_sources sources/open62541_src
+	touch $@
+
 
 define show_revision_details
 	echo -n $(1) "state is: "; git -C $(WORKSPACE)/$(1) show --pretty=format:'%P' -s; echo; git -C $(WORKSPACE)/$(1) status --porcelain ;
