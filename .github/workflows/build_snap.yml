@@ -12,7 +12,15 @@ jobs:
 
   build:
     needs: sources
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
 
     steps:
 
@@ -38,7 +46,7 @@ jobs:
     - name: Upload built artifact
       uses: actions/upload-artifact@v6
       with:
-        name: snap
+        name: snap-${{ matrix.arch }}
         path: ${{ steps.snapcraft.outputs.snap }}
 
 
