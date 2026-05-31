@@ -20,9 +20,9 @@ Workflows described in .github/workflows are meant to run on a GitHub runner. Pl
 
 Dockerfile and part of Makefiles are used for windows installer build, but for Snap build, only snapcraft.yaml is used.
 
-### Manual build ###
+### Developer build ###
 
-Use code from your local Mercurial repositories, cloned from https://hg.beremiz.org
+Use code from local Git repositories in your workspace.
 
 Uses Makefiles and Dockerfile to build windows installer and Makefile+snapcraft.yaml for Snap package.
 
@@ -35,7 +35,7 @@ environment.
 
 Other containerization/virtualization could be used to achieve the same effect. 
 
-Reference build environment is obtained by applying [provision_focal64.sh](provision_focal64.sh) on Ubuntu 20.04 amd64.
+Reference build environment is obtained by applying [provision_noble64.sh](provision_noble64.sh) on Ubuntu 24.04 amd64.
 
 ## Preparing source ##
 
@@ -117,7 +117,6 @@ snapcraft.yaml does not rely on HG or GIT repos, but refers to local sources, th
 Reasons for this are :
  - no parameters or conditional variables exist to tell snapcraft.yaml where to get the source from
  - building from local source should be always possible
- - revisions.txt must be updated in any case so that it is always possible to know what version was used to build resulting package
  - when Snap is built from GitHub actions, Makefile isn't used at all, and GitHub action workflow organize sources and revisions.txt on its own.
 
 In the end, instead of just calling `snapcraft` to get a snap package, it is more complicated:

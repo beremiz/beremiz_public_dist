@@ -30,16 +30,11 @@ endif
 
 FROM_SOURCE_PROJECTS=beremiz matiec $(DIST_FROM_SOURCE_PROJECTS)
 
-define get_revision
-$(1)_revision?=$(lastword $(shell grep $(1) $(src)/revisions.txt))
-endef
-$(foreach project,$(FROM_SOURCE_PROJECTS),$(eval $(call get_revision,$(project))))
-
 tar_opts=--absolute-names --exclude=.* --exclude=.*.pyc --exclude=.*.swp --exclude=__pycache__
 
 define get_revisionid
 $(1)_revisionid ?=\
-		$(shell cd $(WORKSPACE)/$(1) && \
+		$(shell cd $(WORKSPACE)/$(1) && git clean -f -d -X -q && \
 			find . -type f -not -path '*/.*' -not -path '*/__pycache__/*' -print0 \
 			| LC_ALL=C sort -z | xargs -0 sha1sum | sha1sum | cut -d ' ' -f 1)
 endef
@@ -78,7 +73,7 @@ define show_revision_details
 	echo -n $(1) "state is: "; git -C $(WORKSPACE)/$(1) show --pretty=format:'%P' -s; echo; git -C $(WORKSPACE)/$(1) status --porcelain ;
 endef
 
-revisions.txt: $(src)/revisions.txt own_sources
+revisions.txt: own_sources
 	echo "Generate revisions.txt"
 	echo "\n******* PACKAGE REVISIONS ********\n" > revisions.txt
 	echo -n "beremiz_public_dist revision is: "; git -C $(src) show --pretty=format:'%P' -s; echo; git -C $(src) status --porcelain >> revisions.txt
