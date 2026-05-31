@@ -164,7 +164,27 @@ parts:
     override-build: |
       mkdir build && cd build && cmake .. && make
       cp -a $CRAFT_PART_BUILD $CRAFT_PART_INSTALL/open62541
-      
+
+  canfestival:
+    # CanFestival CANopen stack, built out-of-tree with CMake. The static libs
+    # are linked into the PLC shared object, so the build must be
+    # position-independent. CF_CAN_DRIVER takes a list, building one dlopen'd
+    # driver .so per entry: both the "virtual" (testing) and "socket"
+    # (SocketCAN) drivers are shipped so either can be selected in the IDE.
+    plugin: nil
+    source: canfestival
+    source-type: local
+    build-packages:
+      - build-essential
+      - cmake
+    override-build: |
+      mkdir build && cd build && cmake .. \
+        -DCF_TARGET=unix \
+        -DCF_CAN_DRIVER="virtual;socket" \
+        -DCF_TIMERS_DRIVER=unix \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON && make
+      cp -a $CRAFT_PART_BUILD $CRAFT_PART_INSTALL/canfestival
+
   inkscape:
     # CLI only, used in SVGHMI build
     # GUI fails to launch couldn't find a way
@@ -191,6 +211,7 @@ apps:
       - network-bind
       - home
       - removable-media
+      - can-bus
 
   beremiz:
     # Beremiz Command Line interface
@@ -200,6 +221,7 @@ apps:
     plugs:
       - network
       - network-bind
+      - can-bus
  
   runtime:
     # Standalone runtime
@@ -209,4 +231,5 @@ apps:
     plugs:
       - network
       - network-bind
+      - can-bus
 
