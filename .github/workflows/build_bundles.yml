@@ -80,7 +80,7 @@ jobs:
       with:
         name: windows_bundles
         path: |
-          ${{ github.workspace }}/build/Beremiz-*.exe
-          ${{ github.workspace }}/build/Beremiz-*.zip
+          ${{ github.workspace }}/build/beremiz-*.exe
+          ${{ github.workspace }}/build/beremiz-*.zip
         retention-days: 5
 
