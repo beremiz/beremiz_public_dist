@@ -176,6 +176,29 @@ $(matiecdir)/.stamp: sources/matiec_src | installer
 	mv $(tmp)/matiec/lib $(matiecdir)
 	touch $@
 
+# CAN drivers cross-built into canfestival for Windows (CMake list, ';'-separated).
+# peak_windows is omitted: it needs the proprietary PEAK PCANLight SDK headers + import lib.
+CANFESTIVAL_WINDOWS_CAN_DRIVERS = virtual
+
+canfestivaldir = installer/canfestival
+canfestival: $(canfestivaldir)/.stamp
+$(canfestivaldir)/.stamp: sources/canfestival_src | installer
+	rm -rf $(canfestivaldir)
+	cp -a sources/canfestival $(canfestivaldir)
+	cd $(canfestivaldir);\
+	cmake -S . -B build -G "Unix Makefiles" \
+		-DCMAKE_SYSTEM_NAME=Windows \
+		-DCMAKE_C_COMPILER=$(CROSS_COMPILE)-gcc \
+		-DCMAKE_RC_COMPILER=$(CROSS_COMPILE)-windres \
+		-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+		-DCMAKE_SHARED_LINKER_FLAGS="-static -static-libgcc" \
+		-DCF_TARGET=windows \
+		-DCF_TIMERS_DRIVER=windows \
+		-DCF_ENABLE_DLL_DRIVERS=ON \
+		-DCF_CAN_DRIVER="$(CANFESTIVAL_WINDOWS_CAN_DRIVERS)" ;\
+	$(MAKE) -C build -j$(CPUS)
+	touch $@
+
 beremizdir = installer/beremiz
 
 beremiz: $(beremizdir)/.stamp

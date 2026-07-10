@@ -8,7 +8,7 @@
 
 all: main_target
 
-DIST ?= win32
+DIST ?= windows
 
 src := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 WORKSPACE ?= $(abspath $(src)/..)
