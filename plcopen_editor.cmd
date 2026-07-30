@@ -1,16 +1,22 @@
 @echo off
 setlocal
 
-rem Get the directory of the current script
+rem %~dp0 includes a trailing backslash automatically
 set "script_dir=%~dp0"
 
-rem Set the path to the executable relative to the script directory
-set "python_exe=%script_dir%\$MSYS_DIR\$MSYS_ENV_DIR\bin\pythonw.exe"
-set "plcopeneditor_py=%script_dir%\beremiz\PLCOpenEditor.py"
+rem Use USERPROFILE instead of HOMEDRIVE/HOMEPATH for clean space handling
+set "user_home=%USERPROFILE%"
 
-set MSYSTEM=$MSYSTEM
+rem Clean path joining (avoiding double backslashes like %script_dir%\...)
+set "python_exe=%script_dir%$MSYS_DIR\$MSYS_ENV_DIR\bin\pythonw.exe"
+set "plcopeneditor_py=%script_dir%beremiz\PLCOpenEditor.py"
 
-rem Launch PLCOpen editor with all command line arguments
-start "Beremiz IDE" /d %HOMEDRIVE%%HOMEPATH% "%python_exe%" "%plcopeneditor_py%" %*
+set "MSYSTEM=$MSYSTEM"
+
+rem Launch PLCOpen editor:
+rem 1. "PLCOpen Editor" = Explicit window title so quotes aren't eaten
+rem 2. /d "%user_home%" = Quoted working directory
+rem 3. "%python_exe%" "%plcopeneditor_py%" = Quoted executable and script path
+start "PLCOpen Editor" /d "%user_home%" "%python_exe%" "%plcopeneditor_py%" %*
 
 endlocal

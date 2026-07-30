@@ -1,16 +1,20 @@
 @echo off
 setlocal
 
-rem Get the directory of the current script
+rem %~dp0 includes a trailing backslash automatically
 set "script_dir=%~dp0"
 
-rem Set the path to the executable relative to the script directory
-set "python_exe=%script_dir%\$MSYS_DIR\$MSYS_ENV_DIR\bin\pythonw.exe"
-set "beremiz_py=%script_dir%\beremiz\Beremiz.py"
+rem Use USERPROFILE for robust space and path handling
+set "user_home=%USERPROFILE%"
 
-set MSYSTEM=$MSYSTEM
+rem Clean path joining (avoiding double backslashes like %script_dir%\...)
+set "python_exe=%script_dir%$MSYS_DIR\$MSYS_ENV_DIR\bin\pythonw.exe"
+set "beremiz_py=%script_dir%beremiz\Beremiz.py"
+set "winpaths_py=%script_dir%winpaths.py"
 
-rem Launch the executable with winpaths extension added to the command line arguments
-start "Beremiz IDE" /d %HOMEDRIVE%%HOMEPATH% "%python_exe%" "%beremiz_py%" -e "%script_dir%\winpaths.py" %*
+set "MSYSTEM=$MSYSTEM"
+
+rem Launch Beremiz IDE safely with double-quoted paths throughout
+start "Beremiz IDE" /d "%user_home%" "%python_exe%" "%beremiz_py%" -e "%winpaths_py%" %*
 
 endlocal
