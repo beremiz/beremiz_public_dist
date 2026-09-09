@@ -74,7 +74,7 @@ define MINGW_PACKAGES_NAMES
 	$(foreach package, $(MINGW_PY_PACKAGES), python-$(package))
 endef
 
-define PIP_EXCTRA_PACKAGES
+define PIP_EXTRA_PACKAGES
 	pip-system-certs
 	service_identity
 endef
@@ -111,7 +111,7 @@ filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 # windows or msys2 specific packages
 extended_requirements.txt: filtered_requirements.txt
 	cp $< $@
-	($(foreach package, $(PIP_EXCTRA_PACKAGES), echo $(package);)) >> $@
+	($(foreach package, $(PIP_EXTRA_PACKAGES), echo $(package);)) >> $@
 
 # download remaining pip packages separately with local python
 # workaround msys2's git crashing when launched from pip on wine
