@@ -101,12 +101,12 @@ $(MSYS_DIR)/.stamp: pacman/.stamp
 #	$(call pacman_install_msys,$(MSYS_PACKAGES))
 	touch $@
 
-# filter-out all python packages already installed by pacman
+# filter-out all python-* packages already installed by pacman,
+# python packages not matching the python-* naming (wxPython)
 filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 	grep sources/beremiz/requirements_pinned.txt -i -v \
 		`$(call pacman_call, -Qqs 'python-.*') | sed -e 's/$(MSYS_ENV)-python-/ -e /'` \
-		-e wxPython \
-		$(foreach package, $(MSYS_PY_PACKAGES), -e $(package)) > filtered_requirements.txt
+		-e wxPython > filtered_requirements.txt
 
 # windows or msys2 specific packages
 extended_requirements.txt: filtered_requirements.txt
