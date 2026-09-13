@@ -55,6 +55,9 @@ parts:
     #     rebuild wxpython from the PyPI sdist instead of using the deb, so we
     #     keep it out of pip's input entirely. (Same approach as the wxPython
     #     filter in windows_installer.mk.)
+    #   - wxglade declares "Requires-Dist: wxPython>=2.8", which pip would
+    #     resolve to that same sdist, so it is filtered out of the plugin's
+    #     input as well and installed with --no-deps in override-build.
     #   - The deb installs wx into usr/lib/python3/dist-packages, staged into
     #     the payload. With the gnome extension the venv's base interpreter is
     #     the gnome platform's python (base_prefix=/usr at runtime), so neither
@@ -92,10 +95,17 @@ parts:
       craftctl set version="$(python3 $CRAFT_PART_SRC/version.py)"
     override-build: |
       # Produce requirements_snap.txt = requirements_pinned.txt without
-      # wxpython (provided by the staged deb; see note above). Done before
-      # craftctl default so the plugin's pip install picks it up.
-      grep -v -i wxpython requirements_pinned.txt > requirements_snap.txt
+      # wxpython and wxglade (see note above). Done before craftctl default so
+      # the plugin's pip install picks it up.
+      grep -v -i -e wxpython -e '^wxglade ' requirements_pinned.txt > requirements_snap.txt
+      grep -i '^wxglade ' requirements_pinned.txt > requirements_snap_nodeps.txt
       craftctl default
+      # --no-deps has to be a pip command line option: it is rejected inside a
+      # requirements file, and setting PIP_NO_DEPS in build-environment instead
+      # would also reach pip's PEP 517 build isolation, which inherits the
+      # environment, and break source builds whose backend has dependencies.
+      # The plugin offers no way to pass it, hence the separate install here.
+      "$CRAFT_PART_INSTALL"/bin/python3 -m pip install --no-deps -U -r requirements_snap_nodeps.txt
       # Put the staged python3-wxgtk4.0 (usr/lib/python3/dist-packages) on the
       # venv's path; see note above. Relative path so it stays valid when
       # $CRAFT_PART_INSTALL is remapped to $SNAP at install time.
