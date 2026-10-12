@@ -171,8 +171,9 @@ parts:
     build-packages:
       - build-essential
       - cmake
+      - libssl-dev
     override-build: |
-      mkdir build && cd build && cmake .. && make
+      mkdir build && cd build && cmake -D UA_ENABLE_ENCRYPTION=OPENSSL -D CMAKE_POSITION_INDEPENDENT_CODE=ON .. && make
       cp -a $CRAFT_PART_BUILD $CRAFT_PART_INSTALL/open62541
 
   canfestival:

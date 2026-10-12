@@ -13,8 +13,8 @@ jobs:
         matiec_revisionid: 79410c7660cf337ec7991a167e53ef141a26caf9
         canfestival_revisionid: c41b9cc7224398cc8f5a3b853f3743b395d02222
         Modbus_revisionid: 74a5f6a2c3f9b61308a62fc58bbe10572d79a003
-        # v1.3.7
-        open62541_revisionid: b8ac9e77f703e6ba5c012b886a8821037503daa6
+        # v1.5.9
+        open62541_revisionid: 05c2b389b65cc35884eb40d800301af1f3d130cf
 
 
     steps:
