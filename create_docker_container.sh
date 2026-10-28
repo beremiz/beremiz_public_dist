@@ -20,6 +20,5 @@ docker create \
        --name beremiz_public_builder_current \
        -v $SRCDIR:$UHOME/src \
        -v $BUILDDIR:$UHOME/build \
-       -v /tmp/.X11-unix/X0:/tmp/.X11-unix/X0 \
        -w $UHOME/build \
        -i -t beremiz_public_builder /bin/bash

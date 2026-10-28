@@ -1,0 +1,3 @@
+# Keep LF line endings on checkout, even with Git for Windows' core.autocrlf,
+# since shell scripts and makefiles are run on Linux (Docker, WSL2).
+* text=auto eol=lf

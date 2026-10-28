@@ -37,6 +37,31 @@ Other containerization/virtualization could be used to achieve the same effect.
 
 Reference build environment is obtained by applying [provision_trixie64.sh](provision_trixie64.sh) on [MSYS2 docker image](https://github.com/msys2/msys2-docker) (Debian 13 amd64 with patched Wine), as done in [Dockerfile](Dockerfile).
 
+### Windows host (WSL2) ###
+
+Scripts are meant to run on a Linux host. On Windows, they can be used
+unchanged from a shell of a WSL2 Linux distribution (e.g. Ubuntu), provided
+that:
+
+ - `docker` command is available in that distribution, either from Docker
+   Desktop with "WSL integration" enabled for that distribution, or from Docker
+   Engine installed in the distribution itself.
+ - source and build directories are in distribution's own filesystem (e.g.
+   `~/src` and `~/build`), not in Windows filesystem (`/mnt/c/...`). Build runs
+   Wine that creates many thousands of files in build directory, which is way
+   slower on Windows filesystem.
+ - repositories are cloned with git from inside the distribution. Git for
+   Windows converts line endings to CRLF by default, which breaks scripts and
+   build.
+
+Resulting installer can be retrieved from Windows Explorer at
+`\\wsl$\<distribution>\home\<user>\build`.
+
+Only amd64 hosts are supported, MSYS2 docker image isn't available for arm64.
+
+Alternatively, GitHub CI workflow can be run on a fork to get windows
+installer built without Docker on the host.
+
 ## Preparing source ##
 
 The top Makefile expects source code of Beremiz, Matiec and CanFestival to be 

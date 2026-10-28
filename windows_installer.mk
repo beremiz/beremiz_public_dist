@@ -9,8 +9,6 @@ MSYS_ENV_DIR=ucrt64
 MSYS_ENV=mingw-w64-ucrt-x86_64
 MSYS_ROOT=$(CURDIR)/$(MSYS_DIR)
 
-XVFBRUN ?= xvfb-run -a
-
 msysfinaldir=installer/$(MSYS_DIR)
 
 # path of a linux file as seen by MSYS2 programs run in wine (Z: is linux root)
