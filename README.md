@@ -35,7 +35,7 @@ environment.
 
 Other containerization/virtualization could be used to achieve the same effect. 
 
-Reference build environment is obtained by applying [provision_noble64.sh](provision_noble64.sh) on Ubuntu 24.04 amd64.
+Reference build environment is obtained by applying [provision_trixie64.sh](provision_trixie64.sh) on [MSYS2 docker image](https://github.com/msys2/msys2-docker) (Debian 13 amd64 with patched Wine), as done in [Dockerfile](Dockerfile).
 
 ## Preparing source ##
 
@@ -53,7 +53,7 @@ For example :
      /open62541   [optional]
 ```
 
-Repositories can be cloned from https://hg.beremiz.org .
+Repositories can be cloned from https://github.com/beremiz .
 
 Intermediate and final results are all placed in a single 'build directory'
 during build process.

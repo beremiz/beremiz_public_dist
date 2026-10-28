@@ -3,7 +3,6 @@ installer:
 	mkdir -p installer
 
 CURDIR:=$(shell pwd)
-PACMANPFX=$(CURDIR)/pacman
 MSYS_DIR=msys64
 MSYSTEM=UCRT64
 MSYS_ENV_DIR=ucrt64
@@ -14,30 +13,16 @@ XVFBRUN ?= xvfb-run -a
 
 msysfinaldir=installer/$(MSYS_DIR)
 
-pacman-6.0.0/src.stamp:
-	rm -rf pacman pacman-6.0.0
-	$(call get_src_http,https://sources.archlinux.org/other/pacman,pacman-6.0.0.tar.xz)\
-	tar -xJf $$dld
-	touch $@
+# path of a linux file as seen by MSYS2 programs run in wine (Z: is linux root)
+msyspath = /z$(abspath $(1))
 
-pacman-6.0.0/patched.stamp: pacman-6.0.0/src.stamp
-	cd pacman-6.0.0 ;\
-	patch -p1 < $(src)/pacman-6.0.0-nogpg-relative_conf.patch ;
-	touch $@
-
-pacman/.stamp: pacman-6.0.0/patched.stamp
-	cd pacman-6.0.0 ;\
-	meson -Droot-dir=$(MSYS_ROOT) -Dsysconfdir=$(MSYS_ROOT)/etc -Dlocalstatedir=$(MSYS_ROOT)/var build ;\
-	DESTDIR=$(PACMANPFX) ninja -C build install
-	touch $@
-
+# MSYS2's own pacman, run in wine, using build-time configuration
 define pacman_call
-LD_LIBRARY_PATH=$(PACMANPFX)/usr/lib/x86_64-linux-gnu/ fakeroot pacman/usr/bin/pacman $(1)
+WINEPATH="$$(winepath -w $(MSYS_ROOT)/usr/bin)" $(wine) $(MSYS_ROOT)/usr/bin/pacman.exe --config $(call msyspath,pacman.conf) $(1)
 endef
 
-pacman_update=$(call pacman_call, -Sy --noconfirm --cachedir $(distfiles));
-pacman_install_ming=$(call pacman_call, -S $(1) --arch x86_64 --noconfirm --cachedir $(distfiles));
-pacman_install_msys=$(call pacman_call, -S $(1) --noconfirm --cachedir $(distfiles));
+pacman_update=$(call pacman_call, -Sy --noconfirm);
+pacman_install=$(call pacman_call, -S $(1) --noconfirm --cachedir $(call msyspath,$(distfiles)));
 
 # First part are python packages requested by our app and available in msys
 # Second part are dependencies of packages to be later installed with pip
@@ -62,6 +47,7 @@ define MINGW_PY_PACKAGES
 	aiosqlite
 	pytz
 	sortedcontainers
+	psutil
 
 	pip
 endef
@@ -77,66 +63,72 @@ endef
 define PIP_EXTRA_PACKAGES
 	pip-system-certs
 	service_identity
+	cbor2==5.9.0
 endef
 
+define PIP_ENV
+	AUTOBAHN_USE_NVX=0
+endef
 
 MINGW_PACKAGES=$(foreach package, $(MINGW_PACKAGES_NAMES), $(MSYS_ENV)-$(package))
 
-# define MSYS_PACKAGES
-# 	git
-# endef
+define MSYS_PACKAGES
+	git
+endef
 
-$(MSYS_DIR)/.stamp: pacman/.stamp 
+$(MSYS_DIR)/.stamp:
 	rm -rf $(MSYS_DIR)
 
 	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20260322.tar.xz)\
 	tar -xJf $$dld
 
+	# Build-time pacman configuration derived from MSYS2's one :
+	#  - no signature check, keyring would need pacman-key --init (slow in wine,
+	#    and private key must not be shipped), so only main mirror is used
+	#  - no man pages or docs, useless in installer and very slow to extract in
+	#    wine (thousands of files in a single directory)
+	sed -e 's/^SigLevel .*/SigLevel = Never/' \
+	    -e 's|^Include = /etc/pacman.d/mirrorlist.mingw|Server = https://repo.msys2.org/mingw/$$repo/|' \
+	    -e 's|^Include = /etc/pacman.d/mirrorlist.msys|Server = https://repo.msys2.org/msys/$$arch/|' \
+	    -e 's|^#NoExtract .*|NoExtract = */share/man/* */share/doc/* */share/info/*|' \
+	    $(MSYS_DIR)/etc/pacman.conf > pacman.conf
+
 	# Do NOT update package lists to make build reproducible
 	# All packages version are as given in base image.
 	## $(pacman_update)	
 
-	$(call pacman_install_ming,$(MINGW_PACKAGES))
-
-#	$(call pacman_install_msys,$(MSYS_PACKAGES))
+	$(call pacman_install,$(MINGW_PACKAGES) $(MSYS_PACKAGES))
 	touch $@
 
 # filter-out all python-* packages already installed by pacman,
-# python packages not matching the python-* naming (wxPython)
 filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 	grep sources/beremiz/requirements_pinned.txt -i -v \
 		`$(call pacman_call, -Qqs 'python-.*') | sed -e 's/$(MSYS_ENV)-python-/ -e /'` \
-		-e wxPython > filtered_requirements.txt
+		`# python packages not matching the python-* naming` \
+		-e wxPython \
+		\
+		`# and packages replaced by windows specific version` \
+		-e cbor2 \
+		> filtered_requirements.txt
 
 # windows or msys2 specific packages
+# cbor2 6.x needs Rust to build, 5.x has a pure python fallback
 extended_requirements.txt: filtered_requirements.txt
 	cp $< $@
 	($(foreach package, $(PIP_EXTRA_PACKAGES), echo $(package);)) >> $@
 
-# download remaining pip packages separately with local python
-# workaround msys2's git crashing when launched from pip on wine
-# bug: https://bugs.winehq.org/show_bug.cgi?id=40528
-# TODO: get rid of this workaround, bug is fixed in wine 9.11
 extended_requirements.md5: extended_requirements.txt
 	md5sum $< > $@.tmp
 	cmp -s $@ $@.tmp && rm $@.tmp || mv $@.tmp $@
 
-pip_downloads/.stamp: extended_requirements.md5
-	rm -rf pip_downloads
-	mkdir pip_downloads
-	python3 -m pip download --platform mingw_x86_64_ucrt --no-deps -r extended_requirements.txt -d pip_downloads
-	touch $@
-
-# install downloaded .whl files with wine
-# TODO: find a less convoluted way instead of wine to build/install packages
-#       but still populating __pycache__ for this particular python version
 winpythonbin = $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin/python.exe
 wine = WINEPREFIX=$(tmp) wine
-pip.stamp: pip_downloads/.stamp
-	cd pip_downloads;\
-	MSYSTEM=$(MSYSTEM) \
-	WINEPATH="`winepath -w $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin`" \
-	$(wine) $(winpythonbin) -m pip install --no-deps --break-system-packages *
+# MSYSTEM is NOT set : MSYS2's python would use '/' as os.sep, and symlinks
+# extracted from sdists (i.e. autobahn) would then be broken in wine
+pip.stamp: $(MSYS_DIR)/.stamp extended_requirements.md5
+	WINEPATH="`winepath -w $(MSYS_ROOT)/$(MSYS_ENV_DIR)/bin`;`winepath -w $(MSYS_ROOT)/usr/bin`" \
+	$(PIP_ENV) \
+	$(wine) $(winpythonbin) -m pip install --no-deps --break-system-packages -r `winepath -w extended_requirements.txt`
 	touch $@
 
 # final patching step once MSYS2 directory is in place
