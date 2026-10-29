@@ -8,6 +8,7 @@ MSYSTEM=UCRT64
 MSYS_ENV_DIR=ucrt64
 MSYS_ENV=mingw-w64-ucrt-x86_64
 MSYS_ROOT=$(CURDIR)/$(MSYS_DIR)
+MSYS_MIN_ROOT=$(CURDIR)/min/$(MSYS_DIR)
 
 msysfinaldir=installer/$(MSYS_DIR)
 
@@ -16,11 +17,11 @@ msyspath = /z$(abspath $(1))
 
 # MSYS2's own pacman, run in wine, using build-time configuration
 define pacman_call
-WINEPATH="$$(winepath -w $(MSYS_ROOT)/usr/bin)" $(wine) $(MSYS_ROOT)/usr/bin/pacman.exe --config $(call msyspath,pacman.conf) $(1)
+WINEPATH="$$(winepath -w $(1)/usr/bin)" $(wine) $(1)/usr/bin/pacman.exe --config $(call msyspath,pacman.conf) $(2)
 endef
 
-pacman_update=$(call pacman_call, -Sy --noconfirm);
-pacman_install=$(call pacman_call, -S $(1) --noconfirm --cachedir $(call msyspath,$(distfiles)));
+pacman_update=$(call pacman_call, $(1), -Sy --noconfirm);
+pacman_install=$(call pacman_call, $(1), -S $(2) --noconfirm --cachedir $(call msyspath,$(distfiles)));
 
 # First part are python packages requested by our app and available in msys
 # Second part are dependencies of packages to be later installed with pip
@@ -74,11 +75,13 @@ define MSYS_PACKAGES
 	git
 endef
 
-$(MSYS_DIR)/.stamp:
-	rm -rf $(MSYS_DIR)
+# minimal MSYS2 install for the installer
+min/$(MSYS_DIR)/.stamp:
+	rm -rf min
+	mkdir min
 
-	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20260322.tar.xz)\
-	tar -xJf $$dld
+	$(call get_src_http,https://repo.msys2.org/distrib/x86_64,msys2-base-x86_64-20260927.tar.xz)\
+	tar -C min -xJf $$dld
 
 	# Build-time pacman configuration derived from MSYS2's one :
 	#  - no signature check, keyring would need pacman-key --init (slow in wine,
@@ -89,19 +92,27 @@ $(MSYS_DIR)/.stamp:
 	    -e 's|^Include = /etc/pacman.d/mirrorlist.mingw|Server = https://repo.msys2.org/mingw/$$repo/|' \
 	    -e 's|^Include = /etc/pacman.d/mirrorlist.msys|Server = https://repo.msys2.org/msys/$$arch/|' \
 	    -e 's|^#NoExtract .*|NoExtract = */share/man/* */share/doc/* */share/info/*|' \
-	    $(MSYS_DIR)/etc/pacman.conf > pacman.conf
+	    min/$(MSYS_DIR)/etc/pacman.conf > pacman.conf
 
 	# Do NOT update package lists to make build reproducible
 	# All packages version are as given in base image.
-	## $(pacman_update)	
+	## $(pacman_update, $(MSYS_MIN_ROOT))	
 
-	$(call pacman_install,$(MINGW_PACKAGES) $(MSYS_PACKAGES))
+	$(call pacman_install, $(MSYS_MIN_ROOT), $(MINGW_PACKAGES))
+	touch $@
+
+# extend MSYS2 with (pip) build requirements 
+$(MSYS_DIR)/.stamp: min/$(MSYS_DIR)/.stamp
+	rm -rf $(MSYS_DIR)
+	cp -a min/$(MSYS_DIR) .
+	rm $@
+	$(call pacman_install, $(MSYS_ROOT), $(MSYS_PACKAGES))
 	touch $@
 
 # filter-out all python-* packages already installed by pacman,
 filtered_requirements.txt: $(MSYS_DIR)/.stamp sources/beremiz_src
 	grep sources/beremiz/requirements_pinned.txt -i -v \
-		`$(call pacman_call, -Qqs 'python-.*') | sed -e 's/$(MSYS_ENV)-python-/ -e /'` \
+		`$(call pacman_call, $(MSYS_ROOT), -Qqs 'python-.*') | sed -e 's/$(MSYS_ENV)-python-/ -e /'` \
 		`# python packages not matching the python-* naming` \
 		-e wxPython \
 		\
@@ -129,10 +140,24 @@ pip.stamp: $(MSYS_DIR)/.stamp extended_requirements.md5
 	$(wine) $(winpythonbin) -m pip install --no-deps --break-system-packages -r `winepath -w extended_requirements.txt`
 	touch $@
 
+# directories to exclude from results
+define exclusions
+	share/zoneinfo
+	share/terminfo
+	lib/terminfo
+	share/man
+	share/bash-completion
+	lib/python*
+	lib/tk*
+	lib/tcl*
+endef
+tar_exclusions = $(foreach exclusion,$(exclusions),'--exclude=*/$(exclusion)/*')
+
 # final patching step once MSYS2 directory is in place
 $(msysfinaldir)/.stamp: pip.stamp | installer
 	rm -rf $(msysfinaldir)
-	cp -a $(MSYS_DIR) $(msysfinaldir)
+	tar $(tar_exclusions) -C min -c $(MSYS_DIR) | tar -C installer -x
+	(cd $(MSYS_DIR)/$(MSYS_ENV_DIR)/lib; tar '--exclude=python*/test/*' -c python*)| tar -C $(msysfinaldir)/$(MSYS_ENV_DIR)/lib -x
 
 	# Ensure that app's home directory is set to in Beremiz's AppData
 	sed -i '/^db_home:/c\db_home: /%H/AppData/Roaming/Beremiz' $(msysfinaldir)/etc/nsswitch.conf
