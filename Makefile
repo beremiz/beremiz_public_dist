@@ -65,10 +65,6 @@ sources/open62541_src: | sources
 	mv open62541-1.5.9 sources/open62541
 	touch $@
 
-all_sources: own_sources sources/open62541_src
-	touch $@
-
-
 define show_revision_details
 	echo -n $(1) "state is: "; git -C $(WORKSPACE)/$(1) show --pretty=format:'%P' -s; echo; git -C $(WORKSPACE)/$(1) status --porcelain ;
 endef

@@ -2,9 +2,9 @@
 
 main_target: snap_amd64 snap_arm64
 
-DIST_FROM_SOURCE_PROJECTS=canfestival Modbus
+DIST_FROM_SOURCE_PROJECTS=canfestival Modbus open62541
 
-snap_sources: all_sources $(src)/snap/snapcraft.yaml | revisions.txt  # revisions.txt is regenated even if no changes
+snap_sources: own_sources $(src)/snap/snapcraft.yaml | revisions.txt  # revisions.txt is regenated even if no changes
 	rm -rf sources/snap
 	tar -C $(src) $(tar_opts) -c snap | tar -C sources -x
 	cp revisions.txt sources

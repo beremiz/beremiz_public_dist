@@ -73,9 +73,9 @@ For example :
      /beremiz
      /beremiz_public_dist
      /matiec
-     /canfestival [optional]
-     /Modbus      [optional]
-     /open62541   [optional]
+     /canfestival [windows, snap]
+     /Modbus      [snap]
+     /open62541   [snap]
 ```
 
 Repositories can be cloned from https://github.com/beremiz .
