@@ -54,6 +54,25 @@ that:
    Windows converts line endings to CRLF by default, which breaks scripts and
    build.
 
+Setup steps:
+```
+# If WSL not already installed
+wsl --install
+
+# Add a WSL2 distribution
+wsl --shutdown
+wsl --update
+wsl --install -d Ubuntu     # or: wsl -d Ubuntu if already installed
+
+# Get Docker Desktop
+winget install -e --id Docker.DockerDesktop
+
+# Docker integration with default WSL distro is on by default
+wsl --set-default Ubuntu
+docker desktop restart
+
+```
+
 Resulting installer can be retrieved from Windows Explorer at
 `\\wsl$\<distribution>\home\<user>\build`.
 
