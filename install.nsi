@@ -54,8 +54,8 @@ Section "Shortcuts"
   CreateDirectory "$SMPROGRAMS\Beremiz"
   SetOutPath "%HOMEDRIVE%%HOMEPATH%"
   CreateShortCut "$SMPROGRAMS\Beremiz\PlcopenEditor.lnk" "$INSTDIR\plcopen_editor.cmd" "" "$INSTDIR\beremiz\images\poe.ico" "" SW_SHOWMINIMIZED
-  CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "$INSTDIR\beremiz_ide.cmd" "" "$INSTDIR\beremiz\images\brz.ico" "" SW_SHOWMINIMIZED
-  CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz.lnk" "$INSTDIR\beremiz_select_sdk.cmd" "" "$INSTDIR\beremiz\images\brz.ico" "" SW_SHOWMINIMIZED
+  CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz_IDE.lnk" "$INSTDIR\beremiz_ide.cmd" "" "$INSTDIR\beremiz\images\brz.ico" "" SW_SHOWMINIMIZED
+  CreateShortCut "$SMPROGRAMS\Beremiz\Beremiz_select_PLC-SDK.lnk" "$INSTDIR\beremiz_select_sdk.cmd" "" "$INSTDIR\beremiz\images\brz.ico" "" SW_SHOWMINIMIZED
   CreateShortCut "$SMPROGRAMS\Beremiz\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 SectionEnd
 
