@@ -72,6 +72,9 @@ parts:
       - requirements_snap.txt
     build-environment:
       - PARTS_PYTHON_VENV_ARGS: --system-site-packages
+      # gnome extension puts its SDK's python modules first in PYTHONPATH:
+      # its pip shadows the one plugin upgrades in the venv, and pip fails
+      - PYTHONPATH: ""
       # libssl-dev installs opensslconf.h under the arch-triplet include dir
       # (usr/include/$triplet/openssl/), which gcc doesn't search by default
       # when pip builds C extensions like sslpsk against the staged headers.
