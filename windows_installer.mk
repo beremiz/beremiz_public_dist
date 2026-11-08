@@ -236,9 +236,21 @@ ide_revisions = installer/revisions.txt
 $(ide_revisions): revisions.txt
 	cp $< $@ 
 
+define cmd_files
+	beremiz_ide
+	beremiz_select_sdk
+	plcopen_editor
+endef
+
+define patch_cmd_file
+	sed -e "s#\$$MSYS_DIR#$(MSYS_DIR)#g" $(src)/$(1).cmd |\
+	sed -e "s#\$$MSYSTEM#$(MSYSTEM)#g" |\
+	sed -e "s#\$$MSYS_ENV_DIR#$(MSYS_ENV_DIR)#g" > installer/$(1).cmd
+	
+endef
+
 beremiz-windows-build: $(src)/license.txt \
-                       $(src)/beremiz_ide.cmd \
-					   $(src)/plcopen_editor.cmd \
+                       $(foreach cmd_file,$(cmd_files),$(src)/$(cmd_file).cmd) \
 					   $(src)/winpaths.py \
 					   $(msysfinaldir)/.stamp \
 					   pip.stamp \
@@ -249,18 +261,8 @@ beremiz-windows-build: $(src)/license.txt \
 	
 	export BVERSION=`python3 $(VERSIONPY)` ;\
 	sed -e "s/\$$BVERSION/$$BVERSION/g" $(src)/license.txt > installer/license.txt
-	
-	sed -e "s#\$$MSYS_DIR#$(MSYS_DIR)#g" $(src)/beremiz_ide.cmd |\
-	sed -e "s#\$$MSYSTEM#$(MSYSTEM)#g" |\
-	sed -e "s#\$$MSYS_ENV_DIR#$(MSYS_ENV_DIR)#g" > installer/beremiz_ide.cmd
-	
-	sed -e "s#\$$MSYS_DIR#$(MSYS_DIR)#g" $(src)/beremiz_select_sdk.cmd |\
-	sed -e "s#\$$MSYSTEM#$(MSYSTEM)#g" |\
-	sed -e "s#\$$MSYS_ENV_DIR#$(MSYS_ENV_DIR)#g" > installer/beremiz_select_sdk.cmd
-	
-	sed -e "s#\$$MSYS_DIR#$(MSYS_DIR)#g" $(src)/plcopen_editor.cmd |\
-	sed -e "s#\$$MSYSTEM#$(MSYSTEM)#g" |\
-	sed -e "s#\$$MSYS_ENV_DIR#$(MSYS_ENV_DIR)#g" > installer/plcopen_editor.cmd
+
+	$(foreach cmd_file,$(cmd_files),$(call patch_cmd_file,$(cmd_file)))
     
 	sed -e "s#\$$MSYS_DIR#$(MSYS_DIR)#g" $(src)/winpaths.py |\
 	sed -e "s#\$$MSYS_ENV_DIR#$(MSYS_ENV_DIR)#g" > installer/winpaths.py
