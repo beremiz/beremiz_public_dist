@@ -1,0 +1,9 @@
+This toolchain contains cross compiler for raspberry pi image for beremiz runtime.
+
+Due to big size, I have provided here google drive download link of the toolchain file.
+
+After downloading this, User has to install this file and give a path for installation.
+
+After successfull installation, User can find the sysroot directory in installation path and use it to build the compatible IDE for raspberry pi. 
+
+URL : https://drive.google.com/file/d/1_flutDzIpSJqvWDld45JqQTZfykAsgaF/view?ts=65984fbc
